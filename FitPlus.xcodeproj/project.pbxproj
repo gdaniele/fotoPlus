@@ -15,6 +15,9 @@
 		B3303C2219A83373006D6693 /* CameraViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B3303C2119A83373006D6693 /* CameraViewController.swift */; };
 		B3784CE819BA6A8300918BA2 /* CoreLocation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B3784CE719BA6A8300918BA2 /* CoreLocation.framework */; };
 		B37E884319B97DE30018B010 /* InstagramLocation.swift in Sources */ = {isa = PBXBuildFile; fileRef = B37E884219B97DE30018B010 /* InstagramLocation.swift */; };
+		B37E884719B993430018B010 /* InstagramPhoto.swift in Sources */ = {isa = PBXBuildFile; fileRef = B37E884619B993430018B010 /* InstagramPhoto.swift */; };
+		B37E884919B993C70018B010 /* InstagramLike.swift in Sources */ = {isa = PBXBuildFile; fileRef = B37E884819B993C70018B010 /* InstagramLike.swift */; };
+		B37E884B19B994CE0018B010 /* InstagramUser.swift in Sources */ = {isa = PBXBuildFile; fileRef = B37E884A19B994CE0018B010 /* InstagramUser.swift */; };
 		B3B9F0D019B7597300857B6D /* PreviewView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B3B9F0CF19B7597300857B6D /* PreviewView.swift */; };
 /* End PBXBuildFile section */
 
@@ -41,6 +44,9 @@
 		B3303C2119A83373006D6693 /* CameraViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CameraViewController.swift; sourceTree = "<group>"; };
 		B3784CE719BA6A8300918BA2 /* CoreLocation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreLocation.framework; path = System/Library/Frameworks/CoreLocation.framework; sourceTree = SDKROOT; };
 		B37E884219B97DE30018B010 /* InstagramLocation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = InstagramLocation.swift; sourceTree = "<group>"; };
+		B37E884619B993430018B010 /* InstagramPhoto.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = InstagramPhoto.swift; sourceTree = "<group>"; };
+		B37E884819B993C70018B010 /* InstagramLike.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = InstagramLike.swift; sourceTree = "<group>"; };
+		B37E884A19B994CE0018B010 /* InstagramUser.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = InstagramUser.swift; sourceTree = "<group>"; };
 		B3B9F0CF19B7597300857B6D /* PreviewView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PreviewView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -84,6 +90,9 @@
 			isa = PBXGroup;
 			children = (
 				B37E884219B97DE30018B010 /* InstagramLocation.swift */,
+				B37E884619B993430018B010 /* InstagramPhoto.swift */,
+				B37E884819B993C70018B010 /* InstagramLike.swift */,
+				B37E884A19B994CE0018B010 /* InstagramUser.swift */,
 			);
 			name = Models;
 			sourceTree = "<group>";
@@ -257,6 +266,9 @@
 				B3303C0519A8228F006D6693 /* AppDelegate.swift in Sources */,
 				B3303C2219A83373006D6693 /* CameraViewController.swift in Sources */,
 				B3B9F0D019B7597300857B6D /* PreviewView.swift in Sources */,
+				B37E884B19B994CE0018B010 /* InstagramUser.swift in Sources */,
+				B37E884919B993C70018B010 /* InstagramLike.swift in Sources */,
+				B37E884719B993430018B010 /* InstagramPhoto.swift in Sources */,
 				B37E884319B97DE30018B010 /* InstagramLocation.swift in Sources */,
 				B3251B5E19B7CC7800CB2D60 /* NearbyCollectionViewController.swift in Sources */,
 			);

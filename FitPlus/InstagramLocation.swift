@@ -14,12 +14,14 @@ class InstagramLocation: NSObject {
     var location : CLLocation!
     var lat : CLLocationDegrees!
     var lng : CLLocationDegrees!
-    var instagramId : Int!
+    var id : Int!
     
-    init(name: String, location : CLLocation, lat : CLLocationDegrees?, lng : CLLocationDegrees?, instagramId : Int) {
+    var recentPhotos : [Int]? // stores ten most recent photos at location
+    
+    init(name: String, location : CLLocation, lat : CLLocationDegrees?, lng : CLLocationDegrees?, id : Int) {
         self.name = name
         self.location = location
-        self.instagramId = instagramId
+        self.id = id
         
         if lat == nil || lng == nil {
             self.lat = location.coordinate.latitude
