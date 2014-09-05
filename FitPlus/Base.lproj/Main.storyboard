@@ -126,15 +126,11 @@
                     </collectionView>
                     <simulatedStatusBarMetrics key="simulatedStatusBarMetrics"/>
                     <connections>
-                        <outlet property="webView" destination="qTH-e8-QcS" id="mRR-yh-yAG"/>
+                        <outlet property="collectionView" destination="npR-dS-KYg" id="6Fj-fC-ehg"/>
+                        <outlet property="photoCollectionView" destination="npR-dS-KYg" id="H29-sf-8N0"/>
                     </connections>
                 </collectionViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="ZmD-tB-zae" userLabel="First Responder" sceneMemberID="firstResponder"/>
-                <webView contentMode="scaleToFill" id="qTH-e8-QcS">
-                    <rect key="frame" x="0.0" y="0.0" width="600" height="600"/>
-                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
-                    <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
-                </webView>
             </objects>
             <point key="canvasLocation" x="1852" y="551"/>
         </scene>

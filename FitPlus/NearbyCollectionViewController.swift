@@ -7,22 +7,30 @@
 //
 
 import UIKit
+import CoreLocation
 
 let reuseIdentifier = "Cell"
 
-class NearbyCollectionViewController: UICollectionViewController, UIWebViewDelegate {
-    @IBOutlet weak var webView: UIWebView!
+class NearbyCollectionViewController: UICollectionViewController, UIWebViewDelegate, CLLocationManagerDelegate {
+    @IBOutlet var photoCollectionView: UICollectionView!
+    var webView : UIWebView! = nil
     
     var KAUTH_URL_CONSTANT : String! = "https://api.instagram.com/oauth/authorize/"
     var KAPI_URL_CONSTANT : String! = "https://api.instagram.com/v1/locations/"
     var KCLIENT_ID_CONSTANT : String! = "5d93c4bc1c594d749acb20fe766c5059"
     var KCLIENT_SERCRET_CONSTANT : String! = "d12c3631a25e4ffaa824737088a43439"
     var KREDIRECT_URI_CONSTANT : String! = "https://0.0.0.0"
+    var KDEFAULT_LOCATION_CHICAGO_CONSTANT : String! = "41.882584,-87.623190"
     
     let activityIndicator : UIActivityIndicatorView = UIActivityIndicatorView(activityIndicatorStyle: UIActivityIndicatorViewStyle.Gray)
+    
+    var locationMeasurements : [CLLocation]!
+    var bestEffortAtLocation : CLLocation!
+    var locationManager : CLLocationManager = CLLocationManager()
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        photoCollectionView.tag = 12
 
         // Uncomment the following line to preserve selection between presentations
         // self.clearsSelectionOnViewWillAppear = false
@@ -31,6 +39,7 @@ class NearbyCollectionViewController: UICollectionViewController, UIWebViewDeleg
         self.collectionView?.registerClass(UICollectionViewCell.self, forCellWithReuseIdentifier: reuseIdentifier)
 
         // Do any additional setup after loading the view.
+        getLocation()
         authorizeInstagram()
     }
 
@@ -103,8 +112,12 @@ class NearbyCollectionViewController: UICollectionViewController, UIWebViewDeleg
         var fullURL : String! = "\(KAUTH_URL_CONSTANT)?client_id=\(KCLIENT_ID_CONSTANT)&redirect_uri=\(KREDIRECT_URI_CONSTANT)&response_type=token"
         var url : NSURL = NSURL(string: fullURL)
         var requestObject = NSURLRequest(URL: url)
-        webView.loadRequest(requestObject)
+        var screenBounds = UIScreen.mainScreen().bounds
+        webView = UIWebView(frame: CGRect(x: 0, y: 0, width: screenBounds.size.width, height: screenBounds.size.height))
         webView.delegate = self
+        webView.loadRequest(requestObject)
+        webView.scalesPageToFit = true
+        webView.contentMode = UIViewContentMode.ScaleAspectFit
         self.view.addSubview(webView)
     }
 
@@ -123,7 +136,6 @@ class NearbyCollectionViewController: UICollectionViewController, UIWebViewDeleg
                 println("Saved instagram access token to defaults")
                 webView.removeFromSuperview()
                 activityIndicator.removeFromSuperview()
-                println("done")
             }
             return false
         }
@@ -140,5 +152,36 @@ class NearbyCollectionViewController: UICollectionViewController, UIWebViewDeleg
     func webViewDidFinishLoad(webView: UIWebView) {
         //remove activity indicator on screen
         activityIndicator.removeFromSuperview()
+    }
+    
+//    MARK: Core Location
+    func getLocation() {
+        locationManager.delegate = self
+        locationManager.desiredAccuracy = kCLLocationAccuracyHundredMeters
+        locationManager.distanceFilter = kCLDistanceFilterNone
+        locationManager.requestWhenInUseAuthorization()
+        locationManager.startUpdatingLocation()
+    }
+    
+    // CLLocation Delegate Methods
+    func locationManager(manager: CLLocationManager!, didUpdateToLocation newLocation: CLLocation!, fromLocation oldLocation: CLLocation!) {
+        locationMeasurements.append(newLocation)
+        var locationAge : NSTimeInterval = newLocation.timestamp.timeIntervalSinceNow
+        if locationAge > 5.0 { //make sure location is fresh
+            return
+        }
+        if newLocation.horizontalAccuracy < 0 { //make sure horizontal accuracy doesn't indicate that something went wrong
+            return
+        }
+        if bestEffortAtLocation == nil || bestEffortAtLocation.horizontalAccuracy > newLocation.horizontalAccuracy {
+            bestEffortAtLocation = newLocation
+            if newLocation.horizontalAccuracy <= locationManager.desiredAccuracy {
+                locationManager.stopUpdatingLocation()
+            }
+        }
+//        TODO: Update the collectionView here with maybe a new network call
+    }
+    func locationManager(manager: CLLocationManager!, didFailWithError error: NSError!) {
+        println("Location Manager failed")
     }
 }
