@@ -12,12 +12,11 @@ import CoreLocation
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
     var window: UIWindow?
-    var manager : CLLocationManager!
 
     func application(application: UIApplication!, didFinishLaunchingWithOptions launchOptions: NSDictionary!) -> Bool {
         // Override point for customization after application launch.
-        manager = CLLocationManager()
-        if CLLocationManager.locationServicesEnabled() == false {
+        var manager = CLLocationManager()
+        if !CLLocationManager.locationServicesEnabled() && CLLocationManager.authorizationStatus() == CLAuthorizationStatus.Denied {
             var servicesDisabledAlert : UIAlertView = UIAlertView(title: "Location Services Disabled", message: "Please enable location services to let FitPlus show you photos taken nearby.", delegate: nil, cancelButtonTitle: "OK")
             servicesDisabledAlert.show()
         }

@@ -22,15 +22,14 @@ class NearbyCollectionViewController: UICollectionViewController, UIWebViewDeleg
     var KREDIRECT_URI_CONSTANT : String! = "https://0.0.0.0"
     var KDEFAULT_LOCATION_CHICAGO_CONSTANT : String! = "41.882584,-87.623190"
     
-    let activityIndicator : UIActivityIndicatorView = UIActivityIndicatorView(activityIndicatorStyle: UIActivityIndicatorViewStyle.Gray)
+    let activityIndicator : UIActivityIndicatorView! = UIActivityIndicatorView(activityIndicatorStyle: UIActivityIndicatorViewStyle.Gray)
     
-    var locationMeasurements : [CLLocation]!
-    var bestEffortAtLocation : CLLocation!
-    var locationManager : CLLocationManager = CLLocationManager()
+    var locationMeasurements : [CLLocation]! = []
+    var bestEffortAtLocation : CLLocation?
+    var manager : CLLocationManager! = CLLocationManager()
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        photoCollectionView.tag = 12
 
         // Uncomment the following line to preserve selection between presentations
         // self.clearsSelectionOnViewWillAppear = false
@@ -39,6 +38,9 @@ class NearbyCollectionViewController: UICollectionViewController, UIWebViewDeleg
         self.collectionView?.registerClass(UICollectionViewCell.self, forCellWithReuseIdentifier: reuseIdentifier)
 
         // Do any additional setup after loading the view.
+    }
+    
+    override func viewWillAppear(animated: Bool) {
         getLocation()
         refreshNearbyPhotos()
     }
@@ -165,11 +167,15 @@ class NearbyCollectionViewController: UICollectionViewController, UIWebViewDeleg
     
 //    MARK: Core Location
     func getLocation() {
-        locationManager.delegate = self
-        locationManager.desiredAccuracy = kCLLocationAccuracyHundredMeters
-        locationManager.distanceFilter = kCLDistanceFilterNone
-        locationManager.requestWhenInUseAuthorization()
-        locationManager.startUpdatingLocation()
+        if CLLocationManager.locationServicesEnabled() && CLLocationManager.authorizationStatus() != CLAuthorizationStatus.Denied {
+            manager.delegate = self
+            manager.desiredAccuracy = kCLLocationAccuracyHundredMeters
+            manager.distanceFilter = kCLDistanceFilterNone
+            manager.requestWhenInUseAuthorization()
+            manager.startUpdatingLocation()
+        } else {
+            println("\(CLLocationManager.authorizationStatus().toRaw())")
+        }
     }
     
     // CLLocation Delegate Methods
@@ -182,15 +188,20 @@ class NearbyCollectionViewController: UICollectionViewController, UIWebViewDeleg
         if newLocation.horizontalAccuracy < 0 { //make sure horizontal accuracy doesn't indicate that something went wrong
             return
         }
-        if bestEffortAtLocation == nil || bestEffortAtLocation.horizontalAccuracy > newLocation.horizontalAccuracy {
+        if bestEffortAtLocation == nil || bestEffortAtLocation?.horizontalAccuracy > newLocation.horizontalAccuracy {
             bestEffortAtLocation = newLocation
-            if newLocation.horizontalAccuracy <= locationManager.desiredAccuracy {
-                locationManager.stopUpdatingLocation()
+            if newLocation.horizontalAccuracy <= manager.desiredAccuracy {
+                manager.stopUpdatingLocation()
             }
         }
 //        TODO: Update the collectionView here with maybe a new network call
     }
+    
     func locationManager(manager: CLLocationManager!, didFailWithError error: NSError!) {
         println("Location Manager failed")
+    }
+    
+    func locationManager(manager: CLLocationManager!, didChangeAuthorizationStatus status: CLAuthorizationStatus) {
+        println("\(status.toRaw())")
     }
 }

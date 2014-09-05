@@ -20,10 +20,6 @@
 	<string>????</string>
 	<key>CFBundleVersion</key>
 	<string>1</string>
-	<key>NSLocationUsageDescription</key>
-	<string>FitPlus uses location information to display nearby photos</string>
-	<key>NSLocationAlwaysUsageDescription</key>
-	<string>FitPlus uses your location only when the app is active</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>FitPlus uses location information to display nearby photos when you are in the app</string>
 </dict>

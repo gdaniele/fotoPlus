@@ -24,16 +24,29 @@ class CameraViewController: UIViewController {
     var movieFileOutput : AVCaptureMovieFileOutput?
     var stillImageOutput : AVCaptureStillImageOutput?
     var backgroundRecordingId : UIBackgroundTaskIdentifier?
-    var deviceAuthorized : Bool?
-    
-    var sessionRunningAndDeviceAuthorized : Bool {
-        get {
-            return ((self.session?.running)! && (self.deviceAuthorized != nil))
+    dynamic var deviceAuthorized : Bool = false {
+        didSet {
+            println("didSet deviceAuthorized \(deviceAuthorized)")
+            if !deviceAuthorized {
+                self.toggleButtons(false, toggleNearbyButton: false)
+            }
+        }
+    }
+    dynamic var sessionRunning : Bool = false {
+        didSet {
+            println("didSet sessionRunning \(sessionRunning)")
+            if !sessionRunning {
+                self.toggleButtons(false, toggleNearbyButton: false)
+            }
         }
     }
     
-    let CONTROL_NORMAL_COLOR : UIColor?
-    let CONTROL_HIGHLIGHT_COLOR : UIColor?
+    override func observeValueForKeyPath(keyPath: String!,
+        ofObject object: AnyObject!,
+        change: [NSObject : AnyObject]!,
+        context: UnsafeMutablePointer<()>) {
+            println("CameraViewController: observeValueForKey: \(keyPath), \(object)")
+    }
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -66,20 +79,21 @@ class CameraViewController: UIViewController {
                 self.backgroundRecordingId = UIBackgroundTaskInvalid
                 var error : NSError?
                 
-                var videoDevice : AVCaptureDevice = CameraViewController.deviceWithMediaTypeAndPosition(AVMediaTypeVideo, position: AVCaptureDevicePosition.Back)
-                var videoDeviceInput : AVCaptureDeviceInput = AVCaptureDeviceInput.deviceInputWithDevice(videoDevice, error: &error) as AVCaptureDeviceInput
+                var videoDevice : AVCaptureDevice! = CameraViewController.deviceWithMediaTypeAndPosition(AVMediaTypeVideo, position: AVCaptureDevicePosition.Back)
+                if (videoDevice != nil) {
+                    var videoDeviceInput : AVCaptureDeviceInput? = AVCaptureDeviceInput.deviceInputWithDevice(videoDevice!, error: &error) as AVCaptureDeviceInput?
+                    if session.canAddInput(videoDeviceInput) {
+                        session.addInput(videoDeviceInput)
+                        self.videoDeviceInput = videoDeviceInput
+                        self.videoDevice = videoDeviceInput!.device
+                    }
+                }
                 
                 if ((error) != nil) {
                     println("Error executing videoDevice")
                 }
                 
                 self.session?.beginConfiguration()
-                
-                if session.canAddInput(videoDeviceInput) {
-                    session.addInput(videoDeviceInput)
-                    self.videoDeviceInput = videoDeviceInput
-                    self.videoDevice = videoDeviceInput.device
-                }
                 
                 var stillImageOutput : AVCaptureStillImageOutput = AVCaptureStillImageOutput()
                 
@@ -94,9 +108,7 @@ class CameraViewController: UIViewController {
             })
         } else {
             // Disable buttons if device has no camera
-            self.snapButton.enabled = false
-            self.flipButton.enabled = false
-            self.timeLimitButton.enabled = false
+            toggleButtons(false, toggleNearbyButton: false)
         }
     }
     
@@ -131,6 +143,15 @@ class CameraViewController: UIViewController {
     }
     
 //    MARK: Device Configuration
+    func toggleButtons(toggleState: Bool, toggleNearbyButton: Bool) {
+        snapButton.enabled = toggleState
+        flipButton.enabled = toggleState
+        timeLimitButton.enabled = toggleState
+        if toggleNearbyButton {
+            nearbyButton.enabled = toggleState
+        }
+    }
+    
     class func setFlashMode(flashMode: AVCaptureFlashMode, device: AVCaptureDevice) {
         if device.flashAvailable && device.isFlashModeSupported(flashMode) {
             var error : NSError?
@@ -216,10 +237,7 @@ class CameraViewController: UIViewController {
     }
 
     @IBAction func flipCamera(sender: AnyObject) {
-        self.snapButton.enabled = false
-        self.flipButton.enabled = false
-        self.timeLimitButton.enabled = false
-        self.nearbyButton.enabled = false
+        toggleButtons(false, toggleNearbyButton: true)
         
         dispatch_async(self.sessionQueue, { () -> Void in
             var currentVideoDevice : AVCaptureDevice = self.videoDevice!
@@ -260,12 +278,9 @@ class CameraViewController: UIViewController {
             self.session!.commitConfiguration()
             
             dispatch_async(dispatch_get_main_queue(), { () -> Void in
-                self.snapButton.enabled = true
-                self.flipButton.enabled = true
-                self.timeLimitButton.enabled = true
-                self.nearbyButton.enabled = true
+                self.toggleButtons(true, toggleNearbyButton: true)
                 
-//                TODO: Implement Video features for iOS 8 (e.g. white bal, ISO, etc)
+//                TODO: Implement Video features for iOS 8 (e.g. white balance, ISO, etc)
             })
         
         })
@@ -275,15 +290,18 @@ class CameraViewController: UIViewController {
     func subjectAreaDidChange(notification: NSNotification) {
         var devicePoint : CGPoint = CGPoint(x: 0.5, y: 0.5)
         self.focus(AVCaptureFocusMode.ContinuousAutoFocus, exposureMode: AVCaptureExposureMode.ContinuousAutoExposure, point: devicePoint, monitorSubjectAreaChange: false)
-        
     }
     
     func addNotificationObservers() {
         NSNotificationCenter.defaultCenter().addObserver(self, selector: "subjectAreaDidChange", name: AVCaptureDeviceSubjectAreaDidChangeNotification, object: self.videoDevice)
+        self.addObserver(self, forKeyPath: "deviceAuthorized", options: NSKeyValueObservingOptions.New, context: nil)
+        self.addObserver(self, forKeyPath: "sessionRunning", options: NSKeyValueObservingOptions.New, context: nil)
     }
     
     func removeNotificationObservers() {
         NSNotificationCenter.defaultCenter().removeObserver(self, name: AVCaptureDeviceSubjectAreaDidChangeNotification, object: self.videoDevice)
+        self.removeObserver(self, forKeyPath: "deviceAuthorized")
+        self.removeObserver(self, forKeyPath: "sessionRunning")
     }
     
 }
