@@ -10,7 +10,7 @@ import UIKit
 import AVFoundation
 import AssetsLibrary
 
-class CameraViewController: UIViewController {
+class CameraViewController: UIViewController, UIAlertViewDelegate {
     @IBOutlet weak var snapButton: UIButton!
     @IBOutlet weak var flipButton: UIButton!
     @IBOutlet weak var timeLimitButton: UIButton!
@@ -87,6 +87,8 @@ class CameraViewController: UIViewController {
                         self.videoDeviceInput = videoDeviceInput
                         self.videoDevice = videoDeviceInput!.device
                     }
+                } else {
+                    self.performSegueWithIdentifier("nearbySegue", sender: self)
                 }
                 
                 if ((error) != nil) {
@@ -104,7 +106,7 @@ class CameraViewController: UIViewController {
                 }
                 self.session?.commitConfiguration()
                 
-                //            TODO: Optional here, dispatch another thread to set up camera controls
+                // TODO: Optional here, dispatch another thread to set up camera controls
             })
         } else {
             // Disable buttons if device has no camera
@@ -119,13 +121,18 @@ class CameraViewController: UIViewController {
     
     override func viewWillAppear(animated: Bool) {
         if UIImagePickerController.isSourceTypeAvailable(UIImagePickerControllerSourceType.Camera) {
-
             dispatch_async(self.sessionQueue, { () -> Void in
                 self.addNotificationObservers()
                 self.session!.startRunning()
             })
         }
         super.viewWillAppear(animated)
+    }
+    
+    override func viewDidAppear(animated: Bool) {
+        if !UIImagePickerController.isSourceTypeAvailable(UIImagePickerControllerSourceType.Camera) {
+            self.performSegueWithIdentifier("nearbySegue", sender: self)
+        }
     }
     
     override func viewDidDisappear(animated: Bool) {
@@ -266,7 +273,6 @@ class CameraViewController: UIViewController {
             
             if self.session!.canAddInput(newVideoDeviceInput) {
                 NSNotificationCenter.defaultCenter().removeObserver(self, name: AVCaptureDeviceSubjectAreaDidChangeNotification, object: currentVideoDevice)
-                
                 NSNotificationCenter.defaultCenter().addObserver(self, selector: "subjectAreaDidChance", name: AVCaptureDeviceSubjectAreaDidChangeNotification, object: newVideoDevice)
                 
                 self.session!.addInput(newVideoDeviceInput)
@@ -304,4 +310,10 @@ class CameraViewController: UIViewController {
         self.removeObserver(self, forKeyPath: "sessionRunning")
     }
     
+//    MARK: UIAlertView delegate
+    func alertView(alertView: UIAlertView, clickedButtonAtIndex buttonIndex: Int) {
+        if buttonIndex == alertView.cancelButtonIndex {
+            self.performSegueWithIdentifier("nearbySegue", sender: self)
+        }
+    }
 }

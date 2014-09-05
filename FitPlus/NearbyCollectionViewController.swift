@@ -25,7 +25,7 @@ class NearbyCollectionViewController: UICollectionViewController, UIWebViewDeleg
     let activityIndicator : UIActivityIndicatorView! = UIActivityIndicatorView(activityIndicatorStyle: UIActivityIndicatorViewStyle.Gray)
     
     var locationMeasurements : [CLLocation]! = []
-    var bestEffortAtLocation : CLLocation?
+    var bestEffortAtLocation : CLLocation! = nil
     var manager : CLLocationManager! = CLLocationManager()
 
     override func viewDidLoad() {
@@ -115,7 +115,7 @@ class NearbyCollectionViewController: UICollectionViewController, UIWebViewDeleg
         var url : NSURL = NSURL(string: fullURL)
         var requestObject = NSURLRequest(URL: url)
         var screenBounds = UIScreen.mainScreen().bounds
-        webView = UIWebView(frame: CGRect(x: 0, y: 0, width: screenBounds.size.width, height: screenBounds.size.height))
+        webView = UIWebView(frame: CGRect(x: 0, y: 20, width: screenBounds.size.width, height: screenBounds.size.height - 20))
         webView.delegate = self
         webView.loadRequest(requestObject)
         webView.scalesPageToFit = true
@@ -190,6 +190,7 @@ class NearbyCollectionViewController: UICollectionViewController, UIWebViewDeleg
         }
         if bestEffortAtLocation == nil || bestEffortAtLocation?.horizontalAccuracy > newLocation.horizontalAccuracy {
             bestEffortAtLocation = newLocation
+            println("\(newLocation.description)")
             if newLocation.horizontalAccuracy <= manager.desiredAccuracy {
                 manager.stopUpdatingLocation()
             }
@@ -198,7 +199,7 @@ class NearbyCollectionViewController: UICollectionViewController, UIWebViewDeleg
     }
     
     func locationManager(manager: CLLocationManager!, didFailWithError error: NSError!) {
-        println("Location Manager failed")
+        println("Location Manager failed with error: \(error.localizedDescription)")
     }
     
     func locationManager(manager: CLLocationManager!, didChangeAuthorizationStatus status: CLAuthorizationStatus) {
