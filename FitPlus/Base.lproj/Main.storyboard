@@ -94,13 +94,14 @@
             </objects>
             <point key="canvasLocation" x="1179" y="551.25"/>
         </scene>
-        <!--HideABar-->
+        <!--Nearby Collection View Controller-->
         <scene sceneID="jTj-BS-RuA">
             <objects>
                 <collectionViewController id="LiV-aL-nxr" customClass="NearbyCollectionViewController" customModule="FitPlus" customModuleProvider="target" sceneMemberID="viewController">
                     <collectionView key="view" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" dataMode="prototypes" id="npR-dS-KYg">
                         <rect key="frame" x="0.0" y="0.0" width="600" height="600"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <color key="backgroundColor" white="0.93108462589999996" alpha="1" colorSpace="calibratedWhite"/>
                         <collectionViewFlowLayout key="collectionViewLayout" minimumLineSpacing="10" minimumInteritemSpacing="10" id="fqa-7g-HaI">
                             <size key="itemSize" width="50" height="50"/>
                             <size key="headerReferenceSize" width="0.0" height="0.0"/>
@@ -123,9 +124,17 @@
                             <outlet property="delegate" destination="LiV-aL-nxr" id="ZqZ-PS-k8X"/>
                         </connections>
                     </collectionView>
-                    <navigationItem key="navigationItem" title="HideABar" id="tJw-HD-VAG"/>
+                    <simulatedStatusBarMetrics key="simulatedStatusBarMetrics"/>
+                    <connections>
+                        <outlet property="webView" destination="qTH-e8-QcS" id="mRR-yh-yAG"/>
+                    </connections>
                 </collectionViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="ZmD-tB-zae" userLabel="First Responder" sceneMemberID="firstResponder"/>
+                <webView contentMode="scaleToFill" id="qTH-e8-QcS">
+                    <rect key="frame" x="0.0" y="0.0" width="600" height="600"/>
+                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                    <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                </webView>
             </objects>
             <point key="canvasLocation" x="1852" y="551"/>
         </scene>

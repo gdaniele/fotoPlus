@@ -10,14 +10,16 @@ import UIKit
 
 let reuseIdentifier = "Cell"
 
-class NearbyCollectionViewController: UICollectionViewController {
-    var delegate : UIWebViewDelegate?
-    var webView : UIWebView?
+class NearbyCollectionViewController: UICollectionViewController, UIWebViewDelegate {
+    @IBOutlet weak var webView: UIWebView!
+    
     var KAUTH_URL_CONSTANT : String! = "https://api.instagram.com/oauth/authorize/"
     var KAPI_URL_CONSTANT : String! = "https://api.instagram.com/v1/locations/"
     var KCLIENT_ID_CONSTANT : String! = "5d93c4bc1c594d749acb20fe766c5059"
     var KCLIENT_SERCRET_CONSTANT : String! = "d12c3631a25e4ffaa824737088a43439"
     var KREDIRECT_URI_CONSTANT : String! = "https://0.0.0.0"
+    
+    let activityIndicator : UIActivityIndicatorView = UIActivityIndicatorView(activityIndicatorStyle: UIActivityIndicatorViewStyle.Gray)
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -29,6 +31,7 @@ class NearbyCollectionViewController: UICollectionViewController {
         self.collectionView?.registerClass(UICollectionViewCell.self, forCellWithReuseIdentifier: reuseIdentifier)
 
         // Do any additional setup after loading the view.
+        authorizeInstagram()
     }
 
     override func didReceiveMemoryWarning() {
@@ -95,14 +98,47 @@ class NearbyCollectionViewController: UICollectionViewController {
     */
     
 //    MARK: Networking
-    func downloadImages() {
+    func authorizeInstagram() {
         // authenticate
-        var fullURL : String! = "\(KAUTH_URL_CONSTANT)\(KCLIENT_ID_CONSTANT)&redirect_uri=\(KREDIRECT_URI_CONSTANT)&response_type=token"
+        var fullURL : String! = "\(KAUTH_URL_CONSTANT)?client_id=\(KCLIENT_ID_CONSTANT)&redirect_uri=\(KREDIRECT_URI_CONSTANT)&response_type=token"
         var url : NSURL = NSURL(string: fullURL)
         var requestObject = NSURLRequest(URL: url)
-        webView?.loadRequest(requestObject)
-        webView?.delegate = self.delegate
-        self.view.addSubview(webView!)
+        webView.loadRequest(requestObject)
+        webView.delegate = self
+        self.view.addSubview(webView)
     }
 
+//    MARK: UIWebViewDelegate
+    func webView(webView: UIWebView, shouldStartLoadWithRequest request: NSURLRequest, navigationType: UIWebViewNavigationType) -> Bool {
+        var urlString : String! = request.URL.absoluteString
+        var urlParts : Array = urlString.componentsSeparatedByString("\(KREDIRECT_URI_CONSTANT)/")
+        if urlParts.count > 1 {
+            urlString = urlParts[1]
+            var accessToken : Range? = urlString.rangeOfString("#access_token=", options: nil, range: nil, locale: nil)
+            if accessToken != nil {
+                var strAccessToken : String = urlString.substringFromIndex(accessToken!.endIndex)
+                let KACCESS_TOKEN_CONSTANT : String = strAccessToken
+                NSUserDefaults.standardUserDefaults().setValue(strAccessToken, forKeyPath: "KACCESS_TOKEN_CONSTANT")
+                NSUserDefaults.standardUserDefaults().synchronize()
+                println("Saved instagram access token to defaults")
+                webView.removeFromSuperview()
+                activityIndicator.removeFromSuperview()
+                println("done")
+            }
+            return false
+        }
+        return true
+    }
+    
+    func webViewDidStartLoad(webView: UIWebView) {
+        //put activity indicator on screen
+        activityIndicator.center = self.view.center
+        activityIndicator.startAnimating()
+        self.view.addSubview(activityIndicator)
+    }
+    
+    func webViewDidFinishLoad(webView: UIWebView) {
+        //remove activity indicator on screen
+        activityIndicator.removeFromSuperview()
+    }
 }
