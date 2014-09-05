@@ -25,8 +25,34 @@ class NearbyCollectionViewController: UICollectionViewController, UIWebViewDeleg
     let activityIndicator : UIActivityIndicatorView! = UIActivityIndicatorView(activityIndicatorStyle: UIActivityIndicatorViewStyle.Gray)
     
     var locationMeasurements : [CLLocation]! = []
-    var bestEffortAtLocation : CLLocation! = nil
     var manager : CLLocationManager! = CLLocationManager()
+    
+    dynamic var bestEffortAtLocation : CLLocation! {
+        didSet {
+            println("didSet bestEffortAtLocation \(bestEffortAtLocation)")
+            if bestEffortAtLocation != nil && accessTokenSet {
+                println("we have a location and an access token!")
+                loadRequestForNearbyPhotos()
+            }
+        }
+    }
+    
+    dynamic var accessTokenSet : Bool = false {
+        didSet {
+            println("didSet accessTokenSet \(accessTokenSet)")
+            if accessTokenSet && bestEffortAtLocation != nil {
+                println("we have an access token and a location!")
+                loadRequestForNearbyPhotos()
+            }
+        }
+    }
+    
+    override func observeValueForKeyPath(keyPath: String!,
+        ofObject object: AnyObject!,
+        change: [NSObject : AnyObject]!,
+        context: UnsafeMutablePointer<()>) {
+            println("NearbyCollectionViewController: observeValueForKey: \(keyPath), \(object)")
+    }
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -38,6 +64,10 @@ class NearbyCollectionViewController: UICollectionViewController, UIWebViewDeleg
         self.collectionView?.registerClass(UICollectionViewCell.self, forCellWithReuseIdentifier: reuseIdentifier)
 
         // Do any additional setup after loading the view.
+        
+        // add KVO
+        self.addObserver(self, forKeyPath: "accessTokenSet", options: NSKeyValueObservingOptions.New, context: nil)
+        self.addObserver(self, forKeyPath: "bestEffortAtLocation", options: NSKeyValueObservingOptions.New, context: nil)
     }
     
     override func viewWillAppear(animated: Bool) {
@@ -124,12 +154,17 @@ class NearbyCollectionViewController: UICollectionViewController, UIWebViewDeleg
     }
     
     func refreshNearbyPhotos() {
+        // Once the access token is set, the callback will download photos
         var accessToken : String? = NSUserDefaults.standardUserDefaults().valueForKey("KACCESS_TOKEN_CONSTANT") as String?
         if accessToken != nil {
-            
+            self.accessTokenSet = true
         } else {
             authorizeInstagram()
         }
+    }
+    
+    func loadRequestForNearbyPhotos() {
+        
     }
 
 //    MARK: UIWebViewDelegate
@@ -147,6 +182,7 @@ class NearbyCollectionViewController: UICollectionViewController, UIWebViewDeleg
                 println("Saved instagram access token to defaults")
                 webView.removeFromSuperview()
                 activityIndicator.removeFromSuperview()
+                self.accessTokenSet = true
             }
             return false
         }
