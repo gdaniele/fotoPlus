@@ -18,6 +18,7 @@
 		B37E884719B993430018B010 /* InstagramPhoto.swift in Sources */ = {isa = PBXBuildFile; fileRef = B37E884619B993430018B010 /* InstagramPhoto.swift */; };
 		B37E884919B993C70018B010 /* InstagramLike.swift in Sources */ = {isa = PBXBuildFile; fileRef = B37E884819B993C70018B010 /* InstagramLike.swift */; };
 		B37E884B19B994CE0018B010 /* InstagramUser.swift in Sources */ = {isa = PBXBuildFile; fileRef = B37E884A19B994CE0018B010 /* InstagramUser.swift */; };
+		B37E884D19B99B530018B010 /* InstagramAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = B37E884C19B99B530018B010 /* InstagramAPI.swift */; };
 		B3B9F0D019B7597300857B6D /* PreviewView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B3B9F0CF19B7597300857B6D /* PreviewView.swift */; };
 /* End PBXBuildFile section */
 
@@ -47,6 +48,7 @@
 		B37E884619B993430018B010 /* InstagramPhoto.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = InstagramPhoto.swift; sourceTree = "<group>"; };
 		B37E884819B993C70018B010 /* InstagramLike.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = InstagramLike.swift; sourceTree = "<group>"; };
 		B37E884A19B994CE0018B010 /* InstagramUser.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = InstagramUser.swift; sourceTree = "<group>"; };
+		B37E884C19B99B530018B010 /* InstagramAPI.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = InstagramAPI.swift; sourceTree = "<group>"; };
 		B3B9F0CF19B7597300857B6D /* PreviewView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PreviewView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -100,6 +102,7 @@
 		B3251B6219B7CCB600CB2D60 /* API */ = {
 			isa = PBXGroup;
 			children = (
+				B37E884C19B99B530018B010 /* InstagramAPI.swift */,
 			);
 			name = API;
 			sourceTree = "<group>";
@@ -268,6 +271,7 @@
 				B3B9F0D019B7597300857B6D /* PreviewView.swift in Sources */,
 				B37E884B19B994CE0018B010 /* InstagramUser.swift in Sources */,
 				B37E884919B993C70018B010 /* InstagramLike.swift in Sources */,
+				B37E884D19B99B530018B010 /* InstagramAPI.swift in Sources */,
 				B37E884719B993430018B010 /* InstagramPhoto.swift in Sources */,
 				B37E884319B97DE30018B010 /* InstagramLocation.swift in Sources */,
 				B3251B5E19B7CC7800CB2D60 /* NearbyCollectionViewController.swift in Sources */,
