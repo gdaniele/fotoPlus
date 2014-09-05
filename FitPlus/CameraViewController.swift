@@ -214,7 +214,7 @@ class CameraViewController: UIViewController, UIAlertViewDelegate {
                 self.deviceAuthorized = true
             } else {
                 dispatch_sync(dispatch_get_main_queue(), { () -> Void in
-                    UIAlertView(title: "FitPlus", message: "FitPlus doesn't have permission to use the camera!", delegate: self, cancelButtonTitle: "OK").show()
+                    UIAlertView(title: "Can't get location", message: "FitPlus doesn't have permission to use the camera!", delegate: self, cancelButtonTitle: "OK").show()
                     self.deviceAuthorized = false
                 })
             }

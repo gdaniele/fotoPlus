@@ -20,28 +20,25 @@ class NearbyCollectionViewController: UICollectionViewController, UIWebViewDeleg
     var KCLIENT_ID_CONSTANT : String! = "5d93c4bc1c594d749acb20fe766c5059"
     var KCLIENT_SERCRET_CONSTANT : String! = "d12c3631a25e4ffaa824737088a43439"
     var KREDIRECT_URI_CONSTANT : String! = "https://0.0.0.0"
-    var KDEFAULT_LOCATION_CHICAGO_CONSTANT : String! = "41.882584,-87.623190"
+    var defaultLocation : CLLocation! = CLLocation(latitude: 41.882584, longitude: -87.623190)
     
     let activityIndicator : UIActivityIndicatorView! = UIActivityIndicatorView(activityIndicatorStyle: UIActivityIndicatorViewStyle.Gray)
     
-    var locationMeasurements : [CLLocation]! = []
+    var locationMeasurements : [CLLocation]! = [] //array of CLLocations.. some will be stale
     var manager : CLLocationManager! = CLLocationManager()
+    
+    var currentLocation : InstagramLocation? //once we have a location from device, we resolve to an instagram locationId using the API
     
     dynamic var bestEffortAtLocation : CLLocation! {
         didSet {
-            println("didSet bestEffortAtLocation \(bestEffortAtLocation)")
-            if bestEffortAtLocation != nil && accessTokenSet {
-                println("we have a location and an access token!")
+            if bestEffortAtLocation != nil && accessToken != nil{
                 loadRequestForNearbyPhotos()
             }
         }
     }
-    
-    dynamic var accessTokenSet : Bool = false {
+    dynamic var accessToken : String! {
         didSet {
-            println("didSet accessTokenSet \(accessTokenSet)")
-            if accessTokenSet && bestEffortAtLocation != nil {
-                println("we have an access token and a location!")
+            if accessToken != nil && bestEffortAtLocation != nil {
                 loadRequestForNearbyPhotos()
             }
         }
@@ -66,7 +63,7 @@ class NearbyCollectionViewController: UICollectionViewController, UIWebViewDeleg
         // Do any additional setup after loading the view.
         
         // add KVO
-        self.addObserver(self, forKeyPath: "accessTokenSet", options: NSKeyValueObservingOptions.New, context: nil)
+        self.addObserver(self, forKeyPath: "accessToken", options: NSKeyValueObservingOptions.New, context: nil)
         self.addObserver(self, forKeyPath: "bestEffortAtLocation", options: NSKeyValueObservingOptions.New, context: nil)
     }
     
@@ -157,14 +154,54 @@ class NearbyCollectionViewController: UICollectionViewController, UIWebViewDeleg
         // Once the access token is set, the callback will download photos
         var accessToken : String? = NSUserDefaults.standardUserDefaults().valueForKey("KACCESS_TOKEN_CONSTANT") as String?
         if accessToken != nil {
-            self.accessTokenSet = true
+            self.accessToken = accessToken
         } else {
             authorizeInstagram()
         }
     }
     
+    func getInstagramLocationId() {
+        var session : NSURLSession = NSURLSession.sharedSession()
+        var urlString : String! = "\(KAPI_URL_CONSTANT)search?lat=\(bestEffortAtLocation.coordinate.latitude as Double)&lng=\(bestEffortAtLocation.coordinate.longitude as Double)&access_token=\(accessToken)"
+        var url : NSURL = NSURL(string: urlString)
+        var error : NSError?
+        session.dataTaskWithURL(url, completionHandler: {(data: NSData!, response: NSURLResponse!, error: NSError!) in
+            if (error != nil) {
+                println("Errors: \(error)")
+            } else {
+                var httpResponse : NSHTTPURLResponse? = response as NSHTTPURLResponse
+                if httpResponse?.statusCode == 200 {
+                    var json : NSDictionary = NSJSONSerialization.JSONObjectWithData(data, options: NSJSONReadingOptions.convertFromNilLiteral(), error: nil) as NSDictionary
+                    var locationObject : NSDictionary? = json.valueForKey("data")?.firstObject as? NSDictionary
+                    if locationObject != nil {
+                        println(locationObject?.description)
+                        var name : String!
+                        if let actualName = locationObject?.objectForKey("name") {
+                            name = actualName as String
+                        } else {
+                            name = "\(self.bestEffortAtLocation.coordinate.latitude), \(self.bestEffortAtLocation.coordinate.longitude)"
+                        }
+                        var lat : CLLocationDegrees? = locationObject?.objectForKey("latitude")?.doubleValue
+                        var lng : CLLocationDegrees? = locationObject?.objectForKey("longitude")?.doubleValue
+                        var id : Int! = locationObject?.objectForKey("id")?.integerValue
+                        self.currentLocation = InstagramLocation(name: name, location: self.bestEffortAtLocation, lat: lat!, lng: lng!, instagramId: id!)
+                    } else {
+                        self.resetLocationLookup()
+                    }
+                } else {
+                    self.resetLocationLookup()
+                }
+            }
+        }).resume()
+    }
+    
+    func resetLocationLookup() {
+        UIAlertView(title: "Instagram error", message: "Can't find this location on Instagram. Defaulting to Chicago", delegate: self, cancelButtonTitle: "OK").show()
+        self.bestEffortAtLocation = self.defaultLocation
+    }
+    
     func loadRequestForNearbyPhotos() {
-        
+        getInstagramLocationId()
     }
 
 //    MARK: UIWebViewDelegate
@@ -182,7 +219,7 @@ class NearbyCollectionViewController: UICollectionViewController, UIWebViewDeleg
                 println("Saved instagram access token to defaults")
                 webView.removeFromSuperview()
                 activityIndicator.removeFromSuperview()
-                self.accessTokenSet = true
+                self.accessToken = strAccessToken
             }
             return false
         }
@@ -211,6 +248,7 @@ class NearbyCollectionViewController: UICollectionViewController, UIWebViewDeleg
             manager.startUpdatingLocation()
         } else {
             println("\(CLLocationManager.authorizationStatus().toRaw())")
+            bestEffortAtLocation = defaultLocation
         }
     }
     
@@ -235,10 +273,16 @@ class NearbyCollectionViewController: UICollectionViewController, UIWebViewDeleg
     }
     
     func locationManager(manager: CLLocationManager!, didFailWithError error: NSError!) {
-        println("Location Manager failed with error: \(error.localizedDescription)")
+        if (error != nil) {
+            println("Location Manager failed with error: \(error.localizedDescription)")
+            bestEffortAtLocation = defaultLocation
+        }
     }
     
     func locationManager(manager: CLLocationManager!, didChangeAuthorizationStatus status: CLAuthorizationStatus) {
-        println("\(status.toRaw())")
+        if status == CLAuthorizationStatus.Denied {
+            bestEffortAtLocation = defaultLocation
+        }
+        println("Location Authorization changed to: \(status.toRaw())")
     }
 }
