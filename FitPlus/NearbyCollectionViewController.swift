@@ -40,7 +40,7 @@ class NearbyCollectionViewController: UICollectionViewController, UIWebViewDeleg
 
         // Do any additional setup after loading the view.
         getLocation()
-        authorizeInstagram()
+        refreshNearbyPhotos()
     }
 
     override func didReceiveMemoryWarning() {
@@ -119,6 +119,15 @@ class NearbyCollectionViewController: UICollectionViewController, UIWebViewDeleg
         webView.scalesPageToFit = true
         webView.contentMode = UIViewContentMode.ScaleAspectFit
         self.view.addSubview(webView)
+    }
+    
+    func refreshNearbyPhotos() {
+        var accessToken : String? = NSUserDefaults.standardUserDefaults().valueForKey("KACCESS_TOKEN_CONSTANT") as String?
+        if accessToken != nil {
+            
+        } else {
+            authorizeInstagram()
+        }
     }
 
 //    MARK: UIWebViewDelegate
