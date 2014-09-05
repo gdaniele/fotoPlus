@@ -25,6 +25,9 @@ class InstagramLocation: NSObject {
             self.lat = location.coordinate.latitude
             self.lng = location.coordinate.longitude
             println("WARN: Manually set lat/lng")
+        } else {
+            self.lat = lat
+            self.lng = lng
         }
     }
 }

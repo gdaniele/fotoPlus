@@ -26,8 +26,13 @@ class NearbyCollectionViewController: UICollectionViewController, UIWebViewDeleg
     
     var locationMeasurements : [CLLocation]! = [] //array of CLLocations.. some will be stale
     var manager : CLLocationManager! = CLLocationManager()
+    var otherLocations : [InstagramLocation]?
     
-    var currentLocation : InstagramLocation? //once we have a location from device, we resolve to an instagram locationId using the API
+    dynamic var currentLocation : InstagramLocation? { //once we have a location from device, we resolve to an instagram locationId
+        didSet {
+            
+        }
+    }
     
     dynamic var bestEffortAtLocation : CLLocation! {
         didSet {
@@ -48,7 +53,6 @@ class NearbyCollectionViewController: UICollectionViewController, UIWebViewDeleg
         ofObject object: AnyObject!,
         change: [NSObject : AnyObject]!,
         context: UnsafeMutablePointer<()>) {
-            println("NearbyCollectionViewController: observeValueForKey: \(keyPath), \(object)")
     }
 
     override func viewDidLoad() {
@@ -63,8 +67,11 @@ class NearbyCollectionViewController: UICollectionViewController, UIWebViewDeleg
         // Do any additional setup after loading the view.
         
         // add KVO
-        self.addObserver(self, forKeyPath: "accessToken", options: NSKeyValueObservingOptions.New, context: nil)
-        self.addObserver(self, forKeyPath: "bestEffortAtLocation", options: NSKeyValueObservingOptions.New, context: nil)
+        addobservers()
+    }
+    
+    override func viewDidDisappear(animated: Bool) {
+        removeObservers()
     }
     
     override func viewWillAppear(animated: Bool) {
@@ -135,6 +142,39 @@ class NearbyCollectionViewController: UICollectionViewController, UIWebViewDeleg
     }
     */
     
+//    MARK: Utilities
+    func addobservers() {
+        self.addObserver(self, forKeyPath: "accessToken", options: NSKeyValueObservingOptions.New, context: nil)
+        self.addObserver(self, forKeyPath: "bestEffortAtLocation", options: NSKeyValueObservingOptions.New, context: nil)
+        self.addObserver(self, forKeyPath: "currentLocation", options: NSKeyValueObservingOptions.New, context: nil)
+    }
+    
+    func removeObservers() {
+        self.removeObserver(self, forKeyPath: "accessToken")
+        self.removeObserver(self, forKeyPath: "bestEffortAtLocation")
+        self.removeObserver(self, forKeyPath: "currentLocation")
+    }
+    
+    func locationObjectFromDict(locationObject : NSDictionary) -> InstagramLocation {
+        var name : String!
+        if let actualName = locationObject.objectForKey("name") {
+            name = actualName as String
+        } else {
+            name = "\(self.bestEffortAtLocation.coordinate.latitude), \(self.bestEffortAtLocation.coordinate.longitude)"
+        }
+        var lat : CLLocationDegrees? = locationObject.objectForKey("latitude")?.doubleValue
+        var lng : CLLocationDegrees? = locationObject.objectForKey("longitude")?.doubleValue
+        var id : Int! = locationObject.objectForKey("id")?.integerValue
+        return InstagramLocation(name: name, location: defaultLocation, lat: lat, lng: lng, instagramId: id)
+    }
+    
+    func loadNearbyLocations(locations : NSMutableArray) {
+        for locationObject in locations {
+            var nearbyLocation : InstagramLocation = locationObjectFromDict(locationObject as NSDictionary)
+            otherLocations?.append(nearbyLocation)
+        }
+    }
+    
 //    MARK: Networking
     func authorizeInstagram() {
         // authenticate
@@ -167,28 +207,32 @@ class NearbyCollectionViewController: UICollectionViewController, UIWebViewDeleg
         var error : NSError?
         session.dataTaskWithURL(url, completionHandler: {(data: NSData!, response: NSURLResponse!, error: NSError!) in
             if (error != nil) {
-                println("Errors: \(error)")
+                println("ERROR: \(error)")
             } else {
                 var httpResponse : NSHTTPURLResponse? = response as NSHTTPURLResponse
                 if httpResponse?.statusCode == 200 {
+                    // this has to be done in ObjC Foundation!
                     var json : NSDictionary = NSJSONSerialization.JSONObjectWithData(data, options: NSJSONReadingOptions.convertFromNilLiteral(), error: nil) as NSDictionary
-                    var locationObject : NSDictionary? = json.valueForKey("data")?.firstObject as? NSDictionary
+                    var otherNearbyLocations : NSMutableArray = json.valueForKey("data")?.mutableCopy() as NSMutableArray
+                    var locationObject : NSDictionary? = otherNearbyLocations.firstObject as NSDictionary
+                    if otherNearbyLocations.count > 1 {
+                        otherNearbyLocations.removeObjectAtIndex(0)
+                    }
                     if locationObject != nil {
-                        println(locationObject?.description)
-                        var name : String!
-                        if let actualName = locationObject?.objectForKey("name") {
-                            name = actualName as String
-                        } else {
-                            name = "\(self.bestEffortAtLocation.coordinate.latitude), \(self.bestEffortAtLocation.coordinate.longitude)"
+                        var location : InstagramLocation = self.locationObjectFromDict(locationObject!)
+                        self.currentLocation = location
+                        println("DEBUG: Successfully found instagram location id \(location.instagramId)")
+                        
+                        var backgroundQueue = NSOperationQueue()
+                        backgroundQueue.addOperationWithBlock() {
+                            self.loadNearbyLocations(otherNearbyLocations)
                         }
-                        var lat : CLLocationDegrees? = locationObject?.objectForKey("latitude")?.doubleValue
-                        var lng : CLLocationDegrees? = locationObject?.objectForKey("longitude")?.doubleValue
-                        var id : Int! = locationObject?.objectForKey("id")?.integerValue
-                        self.currentLocation = InstagramLocation(name: name, location: self.bestEffortAtLocation, lat: lat!, lng: lng!, instagramId: id!)
                     } else {
+                        println("ERROR: No location object from instagram")
                         self.resetLocationLookup()
                     }
                 } else {
+                    println("ERROR: HTTP Response: \(httpResponse)")
                     self.resetLocationLookup()
                 }
             }
@@ -201,6 +245,12 @@ class NearbyCollectionViewController: UICollectionViewController, UIWebViewDeleg
     }
     
     func loadRequestForNearbyPhotos() {
+        println("DEBUG: Successfully authenticated")
+        if bestEffortAtLocation == defaultLocation {
+            println("DEBUG :Using default location")
+        } else {
+            println("DEBUG: Using device location")
+        }
         getInstagramLocationId()
     }
 
@@ -264,7 +314,6 @@ class NearbyCollectionViewController: UICollectionViewController, UIWebViewDeleg
         }
         if bestEffortAtLocation == nil || bestEffortAtLocation?.horizontalAccuracy > newLocation.horizontalAccuracy {
             bestEffortAtLocation = newLocation
-            println("\(newLocation.description)")
             if newLocation.horizontalAccuracy <= manager.desiredAccuracy {
                 manager.stopUpdatingLocation()
             }
