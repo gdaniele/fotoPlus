@@ -165,7 +165,7 @@ class NearbyCollectionViewController: UICollectionViewController, UIWebViewDeleg
         var lat : CLLocationDegrees? = locationObject.objectForKey("latitude")?.doubleValue
         var lng : CLLocationDegrees? = locationObject.objectForKey("longitude")?.doubleValue
         var id : Int! = locationObject.objectForKey("id")?.integerValue
-        return InstagramLocation(name: name, location: defaultLocation, lat: lat, lng: lng, instagramId: id)
+        return InstagramLocation(name: name, location: defaultLocation, lat: lat, lng: lng, id: id)
     }
     
     func loadNearbyLocations(locations : NSMutableArray) {
@@ -221,7 +221,7 @@ class NearbyCollectionViewController: UICollectionViewController, UIWebViewDeleg
                     if locationObject != nil {
                         var location : InstagramLocation = self.locationObjectFromDict(locationObject!)
                         self.currentLocation = location
-                        println("DEBUG: Successfully found instagram location id \(location.instagramId)")
+                        println("DEBUG: Successfully found instagram location id \(location.id)")
                         
                         var backgroundQueue = NSOperationQueue()
                         backgroundQueue.addOperationWithBlock() {
