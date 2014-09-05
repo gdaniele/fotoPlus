@@ -15,6 +15,7 @@ class CameraViewController: UIViewController {
     @IBOutlet weak var flipButton: UIButton!
     @IBOutlet weak var timeLimitButton: UIButton!
     @IBOutlet weak var previewView: PreviewView!
+    @IBOutlet weak var nearbyButton: UIButton!
     
     var sessionQueue : dispatch_queue_t?
     var session : AVCaptureSession?
@@ -37,58 +38,66 @@ class CameraViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        self.snapButton.layer.cornerRadius = 4
-        self.flipButton.layer.cornerRadius = 4
-        self.timeLimitButton.layer.cornerRadius = 4
-        self.timeLimitButton.layer.opacity = 0
-        
-        self.snapButton.clipsToBounds = true
-        self.flipButton.clipsToBounds = true
-        self.timeLimitButton.clipsToBounds = true
-        
-        //        Create the AV Session!
-        var session : AVCaptureSession = AVCaptureSession()
-        self.session = session
-        
-        self.previewView.session = session
-        
-        self.checkForAuthorizationStatus()
-        
-        //        It's not safe to mutate an AVCaptureSession from multiple threads at the same time. Here, we're creating a sessionQueue so that the main thread is not blocked when AVCaptureSetting.startRunning is called.
-        var queue : dispatch_queue_t = dispatch_queue_create("sesion queue", DISPATCH_QUEUE_SERIAL);
-        self.sessionQueue = queue
-        
-        dispatch_async(queue, { () -> Void in
-            self.backgroundRecordingId = UIBackgroundTaskInvalid
-            var error : NSError?
+        if UIImagePickerController.isSourceTypeAvailable(UIImagePickerControllerSourceType.Camera) {
+            self.snapButton.layer.cornerRadius = 4
+            self.flipButton.layer.cornerRadius = 4
+            self.timeLimitButton.layer.cornerRadius = 4
+            self.timeLimitButton.layer.opacity = 0
+            self.nearbyButton.layer.cornerRadius = 4
             
-            var videoDevice : AVCaptureDevice = CameraViewController.deviceWithMediaTypeAndPosition(AVMediaTypeVideo, position: AVCaptureDevicePosition.Back)
-            var videoDeviceInput : AVCaptureDeviceInput = AVCaptureDeviceInput.deviceInputWithDevice(videoDevice, error: &error) as AVCaptureDeviceInput
+            self.snapButton.clipsToBounds = true
+            self.flipButton.clipsToBounds = true
+            self.timeLimitButton.clipsToBounds = true
+            self.nearbyButton.clipsToBounds = true
             
-            if ((error) != nil) {
-                println("Error executing videoDevice")
-            }
+            //        Create the AV Session!
+            var session : AVCaptureSession = AVCaptureSession()
+            self.session = session
             
-            self.session?.beginConfiguration()
+            self.previewView.session = session
             
-            if session.canAddInput(videoDeviceInput) {
-                session.addInput(videoDeviceInput)
-                self.videoDeviceInput = videoDeviceInput
-                self.videoDevice = videoDeviceInput.device
-            }
+            self.checkForAuthorizationStatus()
             
-            var stillImageOutput : AVCaptureStillImageOutput = AVCaptureStillImageOutput()
+            //        It's not safe to mutate an AVCaptureSession from multiple threads at the same time. Here, we're creating a sessionQueue so that the main thread is not blocked when AVCaptureSetting.startRunning is called.
+            var queue : dispatch_queue_t = dispatch_queue_create("sesion queue", DISPATCH_QUEUE_SERIAL);
+            self.sessionQueue = queue
             
-            if session.canAddOutput(stillImageOutput) {
-                stillImageOutput.outputSettings = [AVVideoCodecKey : AVVideoCodecJPEG]
-                session.addOutput(stillImageOutput)
-                self.stillImageOutput = stillImageOutput
-            }
-            self.session?.commitConfiguration()
-            
-//            TODO: Optional here, dispatch another thread to set up camera controls
-        })
-        
+            dispatch_async(queue, { () -> Void in
+                self.backgroundRecordingId = UIBackgroundTaskInvalid
+                var error : NSError?
+                
+                var videoDevice : AVCaptureDevice = CameraViewController.deviceWithMediaTypeAndPosition(AVMediaTypeVideo, position: AVCaptureDevicePosition.Back)
+                var videoDeviceInput : AVCaptureDeviceInput = AVCaptureDeviceInput.deviceInputWithDevice(videoDevice, error: &error) as AVCaptureDeviceInput
+                
+                if ((error) != nil) {
+                    println("Error executing videoDevice")
+                }
+                
+                self.session?.beginConfiguration()
+                
+                if session.canAddInput(videoDeviceInput) {
+                    session.addInput(videoDeviceInput)
+                    self.videoDeviceInput = videoDeviceInput
+                    self.videoDevice = videoDeviceInput.device
+                }
+                
+                var stillImageOutput : AVCaptureStillImageOutput = AVCaptureStillImageOutput()
+                
+                if session.canAddOutput(stillImageOutput) {
+                    stillImageOutput.outputSettings = [AVVideoCodecKey : AVVideoCodecJPEG]
+                    session.addOutput(stillImageOutput)
+                    self.stillImageOutput = stillImageOutput
+                }
+                self.session?.commitConfiguration()
+                
+                //            TODO: Optional here, dispatch another thread to set up camera controls
+            })
+        } else {
+            // Disable buttons if device has no camera
+            self.snapButton.enabled = false
+            self.flipButton.enabled = false
+            self.timeLimitButton.enabled = false
+        }
     }
     
     override func didReceiveMemoryWarning() {
@@ -97,18 +106,23 @@ class CameraViewController: UIViewController {
     }
     
     override func viewWillAppear(animated: Bool) {
-        dispatch_async(self.sessionQueue, { () -> Void in
-            self.addNotificationObservers()
-            self.session!.startRunning()
-        })
+        if UIImagePickerController.isSourceTypeAvailable(UIImagePickerControllerSourceType.Camera) {
+
+            dispatch_async(self.sessionQueue, { () -> Void in
+                self.addNotificationObservers()
+                self.session!.startRunning()
+            })
+        }
         super.viewWillAppear(animated)
     }
     
     override func viewDidDisappear(animated: Bool) {
-        dispatch_async(self.sessionQueue, { () -> Void in
-            self.session!.stopRunning()
-            self.removeNotificationObservers()
-        })
+        if UIImagePickerController.isSourceTypeAvailable(UIImagePickerControllerSourceType.Camera) {
+            dispatch_async(self.sessionQueue, { () -> Void in
+                self.session!.stopRunning()
+                self.removeNotificationObservers()
+            })
+        }
         super.viewDidDisappear(animated)
     }
     
@@ -205,6 +219,7 @@ class CameraViewController: UIViewController {
         self.snapButton.enabled = false
         self.flipButton.enabled = false
         self.timeLimitButton.enabled = false
+        self.nearbyButton.enabled = false
         
         dispatch_async(self.sessionQueue, { () -> Void in
             var currentVideoDevice : AVCaptureDevice = self.videoDevice!
@@ -248,6 +263,8 @@ class CameraViewController: UIViewController {
                 self.snapButton.enabled = true
                 self.flipButton.enabled = true
                 self.timeLimitButton.enabled = true
+                self.nearbyButton.enabled = true
+                
 //                TODO: Implement Video features for iOS 8 (e.g. white bal, ISO, etc)
             })
         

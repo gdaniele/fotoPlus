@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		B3251B5E19B7CC7800CB2D60 /* NearbyCollectionViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B3251B5D19B7CC7800CB2D60 /* NearbyCollectionViewController.swift */; };
 		B3303C0519A8228F006D6693 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = B3303C0419A8228F006D6693 /* AppDelegate.swift */; };
 		B3303C0A19A8228F006D6693 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = B3303C0819A8228F006D6693 /* Main.storyboard */; };
 		B3303C0C19A8228F006D6693 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B3303C0B19A8228F006D6693 /* Images.xcassets */; };
@@ -26,6 +27,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		B3251B5D19B7CC7800CB2D60 /* NearbyCollectionViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NearbyCollectionViewController.swift; sourceTree = "<group>"; };
 		B3303BFF19A8228F006D6693 /* FitPlus.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = FitPlus.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		B3303C0319A8228F006D6693 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		B3303C0419A8228F006D6693 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -56,6 +58,37 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		B3251B5F19B7CC9100CB2D60 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				B3B9F0CF19B7597300857B6D /* PreviewView.swift */,
+			);
+			name = Views;
+			sourceTree = "<group>";
+		};
+		B3251B6019B7CC9A00CB2D60 /* View Controllers */ = {
+			isa = PBXGroup;
+			children = (
+				B3303C2119A83373006D6693 /* CameraViewController.swift */,
+				B3251B5D19B7CC7800CB2D60 /* NearbyCollectionViewController.swift */,
+			);
+			name = "View Controllers";
+			sourceTree = "<group>";
+		};
+		B3251B6119B7CCB000CB2D60 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Models;
+			sourceTree = "<group>";
+		};
+		B3251B6219B7CCB600CB2D60 /* API */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = API;
+			sourceTree = "<group>";
+		};
 		B3303BF619A8228F006D6693 = {
 			isa = PBXGroup;
 			children = (
@@ -77,9 +110,11 @@
 		B3303C0119A8228F006D6693 /* FitPlus */ = {
 			isa = PBXGroup;
 			children = (
+				B3251B6219B7CCB600CB2D60 /* API */,
+				B3251B6119B7CCB000CB2D60 /* Models */,
+				B3251B6019B7CC9A00CB2D60 /* View Controllers */,
+				B3251B5F19B7CC9100CB2D60 /* Views */,
 				B3303C0419A8228F006D6693 /* AppDelegate.swift */,
-				B3303C2119A83373006D6693 /* CameraViewController.swift */,
-				B3B9F0CF19B7597300857B6D /* PreviewView.swift */,
 				B3303C0819A8228F006D6693 /* Main.storyboard */,
 				B3303C0B19A8228F006D6693 /* Images.xcassets */,
 				B3303C0219A8228F006D6693 /* Supporting Files */,
@@ -215,6 +250,7 @@
 				B3303C0519A8228F006D6693 /* AppDelegate.swift in Sources */,
 				B3303C2219A83373006D6693 /* CameraViewController.swift in Sources */,
 				B3B9F0D019B7597300857B6D /* PreviewView.swift in Sources */,
+				B3251B5E19B7CC7800CB2D60 /* NearbyCollectionViewController.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
