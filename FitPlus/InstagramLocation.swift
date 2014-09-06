@@ -32,4 +32,8 @@ class InstagramLocation: NSObject {
             self.lng = lng
         }
     }
+    
+    func loadPhotos() {
+        true
+    }
 }

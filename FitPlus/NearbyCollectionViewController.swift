@@ -13,48 +13,19 @@ let reuseIdentifier = "Cell"
 
 class NearbyCollectionViewController: UICollectionViewController, UIWebViewDelegate, CLLocationManagerDelegate {
     @IBOutlet var photoCollectionView: UICollectionView!
+    
+    var api : InstagramAPI = InstagramAPI()
+    
+    dynamic var accessToken : String!
+
+    let activityIndicator : UIActivityIndicatorView! = UIActivityIndicatorView(activityIndicatorStyle: UIActivityIndicatorViewStyle.Gray)
     var webView : UIWebView! = nil
     
-    var KAUTH_URL_CONSTANT : String! = "https://api.instagram.com/oauth/authorize/"
-    var KAPI_URL_CONSTANT : String! = "https://api.instagram.com/v1/locations/"
-    var KCLIENT_ID_CONSTANT : String! = "5d93c4bc1c594d749acb20fe766c5059"
-    var KCLIENT_SERCRET_CONSTANT : String! = "d12c3631a25e4ffaa824737088a43439"
-    var KREDIRECT_URI_CONSTANT : String! = "https://0.0.0.0"
-    var defaultLocation : CLLocation! = CLLocation(latitude: 41.882584, longitude: -87.623190)
-    
-    let activityIndicator : UIActivityIndicatorView! = UIActivityIndicatorView(activityIndicatorStyle: UIActivityIndicatorViewStyle.Gray)
-    
-    var locationMeasurements : [CLLocation]! = [] //array of CLLocations.. some will be stale
     var manager : CLLocationManager! = CLLocationManager()
-    var otherLocations : [InstagramLocation]?
+    var locationMeasurements : [CLLocation]! = [] //array of CLLocations.. some will be stale
+    var defaultLocation : CLLocation?
+    dynamic var bestEffortAtLocation : CLLocation!
     
-    dynamic var currentLocation : InstagramLocation? { //once we have a location from device, we resolve to an instagram locationId
-        didSet {
-            
-        }
-    }
-    
-    dynamic var bestEffortAtLocation : CLLocation! {
-        didSet {
-            if bestEffortAtLocation != nil && accessToken != nil{
-                loadRequestForNearbyPhotos()
-            }
-        }
-    }
-    dynamic var accessToken : String! {
-        didSet {
-            if accessToken != nil && bestEffortAtLocation != nil {
-                loadRequestForNearbyPhotos()
-            }
-        }
-    }
-    
-    override func observeValueForKeyPath(keyPath: String!,
-        ofObject object: AnyObject!,
-        change: [NSObject : AnyObject]!,
-        context: UnsafeMutablePointer<()>) {
-    }
-
     override func viewDidLoad() {
         super.viewDidLoad()
 
@@ -68,6 +39,9 @@ class NearbyCollectionViewController: UICollectionViewController, UIWebViewDeleg
         
         // add KVO
         addobservers()
+        
+        // set default location to Chicago :)
+        defaultLocation = CLLocation(latitude: 41.882584, longitude: -87.623190)
     }
     
     override func viewDidDisappear(animated: Bool) {
@@ -76,7 +50,7 @@ class NearbyCollectionViewController: UICollectionViewController, UIWebViewDeleg
     
     override func viewWillAppear(animated: Bool) {
         getLocation()
-        refreshNearbyPhotos()
+        refreshAccessToken()
     }
 
     override func didReceiveMemoryWarning() {
@@ -144,41 +118,34 @@ class NearbyCollectionViewController: UICollectionViewController, UIWebViewDeleg
     
 //    MARK: Utilities
     func addobservers() {
-        self.addObserver(self, forKeyPath: "accessToken", options: NSKeyValueObservingOptions.New, context: nil)
-        self.addObserver(self, forKeyPath: "bestEffortAtLocation", options: NSKeyValueObservingOptions.New, context: nil)
+        self.addObserver(self.api, forKeyPath: "accessToken", options: NSKeyValueObservingOptions.New, context: nil)
+        self.addObserver(self.api, forKeyPath: "bestEffortAtLocation", options: NSKeyValueObservingOptions.New, context: nil)
         self.addObserver(self, forKeyPath: "currentLocation", options: NSKeyValueObservingOptions.New, context: nil)
+        NSNotificationCenter.defaultCenter().addObserver(self, selector: "instagramLocationsLoaded:", name: "loadedInstagramLocations", object: nil)
+
     }
     
     func removeObservers() {
-        self.removeObserver(self, forKeyPath: "accessToken")
-        self.removeObserver(self, forKeyPath: "bestEffortAtLocation")
+        self.removeObserver(self.api, forKeyPath: "accessToken")
+        self.removeObserver(self.api, forKeyPath: "bestEffortAtLocation")
         self.removeObserver(self, forKeyPath: "currentLocation")
+        NSNotificationCenter.defaultCenter().removeObserver(self, name: "loadedInstagramLocations", object: nil)
+
     }
     
-    func locationObjectFromDict(locationObject : NSDictionary) -> InstagramLocation {
-        var name : String!
-        if let actualName = locationObject.objectForKey("name") {
-            name = actualName as String
+    func refreshAccessToken() {
+        // Once the access token is set, the callback will download photos
+        var accessToken : String? = NSUserDefaults.standardUserDefaults().valueForKey("KACCESS_TOKEN_CONSTANT") as String?
+        if accessToken != nil {
+            self.accessToken = accessToken
         } else {
-            name = "\(self.bestEffortAtLocation.coordinate.latitude), \(self.bestEffortAtLocation.coordinate.longitude)"
-        }
-        var lat : CLLocationDegrees? = locationObject.objectForKey("latitude")?.doubleValue
-        var lng : CLLocationDegrees? = locationObject.objectForKey("longitude")?.doubleValue
-        var id : Int! = locationObject.objectForKey("id")?.integerValue
-        return InstagramLocation(name: name, location: defaultLocation, lat: lat, lng: lng, id: id)
-    }
-    
-    func loadNearbyLocations(locations : NSMutableArray) {
-        for locationObject in locations {
-            var nearbyLocation : InstagramLocation = locationObjectFromDict(locationObject as NSDictionary)
-            otherLocations?.append(nearbyLocation)
+            authorizeInstagram()
         }
     }
     
-//    MARK: Networking
     func authorizeInstagram() {
         // authenticate
-        var fullURL : String! = "\(KAUTH_URL_CONSTANT)?client_id=\(KCLIENT_ID_CONSTANT)&redirect_uri=\(KREDIRECT_URI_CONSTANT)&response_type=token"
+        var fullURL : String! = "\(InstagramConstants().KAUTH_URL_CONSTANT)?client_id=\(InstagramConstants().KCLIENT_ID_CONSTANT)&redirect_uri=\(InstagramConstants().KREDIRECT_URI_CONSTANT)&response_type=token"
         var url : NSURL = NSURL(string: fullURL)
         var requestObject = NSURLRequest(URL: url)
         var screenBounds = UIScreen.mainScreen().bounds
@@ -190,74 +157,19 @@ class NearbyCollectionViewController: UICollectionViewController, UIWebViewDeleg
         self.view.addSubview(webView)
     }
     
-    func refreshNearbyPhotos() {
-        // Once the access token is set, the callback will download photos
-        var accessToken : String? = NSUserDefaults.standardUserDefaults().valueForKey("KACCESS_TOKEN_CONSTANT") as String?
-        if accessToken != nil {
-            self.accessToken = accessToken
-        } else {
-            authorizeInstagram()
-        }
-    }
-    
-    func getInstagramLocationId() {
-        var session : NSURLSession = NSURLSession.sharedSession()
-        var urlString : String! = "\(KAPI_URL_CONSTANT)search?lat=\(bestEffortAtLocation.coordinate.latitude as Double)&lng=\(bestEffortAtLocation.coordinate.longitude as Double)&access_token=\(accessToken)"
-        var url : NSURL = NSURL(string: urlString)
-        var error : NSError?
-        session.dataTaskWithURL(url, completionHandler: {(data: NSData!, response: NSURLResponse!, error: NSError!) in
-            if (error != nil) {
-                println("ERROR: \(error)")
-            } else {
-                var httpResponse : NSHTTPURLResponse? = response as NSHTTPURLResponse
-                if httpResponse?.statusCode == 200 {
-                    // this has to be done in ObjC Foundation!
-                    var json : NSDictionary = NSJSONSerialization.JSONObjectWithData(data, options: NSJSONReadingOptions.convertFromNilLiteral(), error: nil) as NSDictionary
-                    var otherNearbyLocations : NSMutableArray = json.valueForKey("data")?.mutableCopy() as NSMutableArray
-                    var locationObject : NSDictionary? = otherNearbyLocations.firstObject as NSDictionary
-                    if otherNearbyLocations.count > 1 {
-                        otherNearbyLocations.removeObjectAtIndex(0)
-                    }
-                    if locationObject != nil {
-                        var location : InstagramLocation = self.locationObjectFromDict(locationObject!)
-                        self.currentLocation = location
-                        println("DEBUG: Successfully found instagram location id \(location.id)")
-                        
-                        var backgroundQueue = NSOperationQueue()
-                        backgroundQueue.addOperationWithBlock() {
-                            self.loadNearbyLocations(otherNearbyLocations)
-                        }
-                    } else {
-                        println("ERROR: No location object from instagram")
-                        self.resetLocationLookup()
-                    }
-                } else {
-                    println("ERROR: HTTP Response: \(httpResponse)")
-                    self.resetLocationLookup()
-                }
-            }
-        }).resume()
-    }
-    
     func resetLocationLookup() {
         UIAlertView(title: "Instagram error", message: "Can't find this location on Instagram. Defaulting to Chicago", delegate: self, cancelButtonTitle: "OK").show()
-        self.bestEffortAtLocation = self.defaultLocation
+        self.bestEffortAtLocation = defaultLocation
     }
     
-    func loadRequestForNearbyPhotos() {
-        println("DEBUG: Successfully authenticated")
-        if bestEffortAtLocation == defaultLocation {
-            println("DEBUG :Using default location")
-        } else {
-            println("DEBUG: Using device location")
-        }
-        getInstagramLocationId()
+    func instagramLocationsLoaded(notification: NSNotification){
+        var locations : NSMutableArray = InstagramAPI.sharedInstance.nearbyInstagramLocations
     }
-
+    
 //    MARK: UIWebViewDelegate
     func webView(webView: UIWebView, shouldStartLoadWithRequest request: NSURLRequest, navigationType: UIWebViewNavigationType) -> Bool {
         var urlString : String! = request.URL.absoluteString
-        var urlParts : Array = urlString.componentsSeparatedByString("\(KREDIRECT_URI_CONSTANT)/")
+        var urlParts : Array = urlString.componentsSeparatedByString("\(InstagramConstants().KREDIRECT_URI_CONSTANT)/")
         if urlParts.count > 1 {
             urlString = urlParts[1]
             var accessToken : Range? = urlString.rangeOfString("#access_token=", options: nil, range: nil, locale: nil)
