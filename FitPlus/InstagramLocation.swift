@@ -16,7 +16,7 @@ class InstagramLocation: NSObject {
     var lng : CLLocationDegrees!
     var id : Int!
     
-    var recentPhotos : [InstagramPhoto]? // stores ten most recent photos at location
+    var recentPhotos : [InstagramPhoto]! = [InstagramPhoto]() // stores ten most recent photos at location
     
     init(name: String, location : CLLocation, lat : CLLocationDegrees?, lng : CLLocationDegrees?, id : Int) {
         self.name = name
@@ -51,7 +51,8 @@ class InstagramLocation: NSObject {
     func parseAndSavePhotos(json : NSDictionary, success : () -> (), failure : () -> ()) {
         for photo in json["data"] as NSArray {
             var photo : InstagramPhoto = InstagramPhoto(fromDictionary: JSONValue(photo))
-            println("got one")
+            self.recentPhotos?.append(photo)
         }
+        success()
     }
 }

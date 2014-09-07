@@ -26,7 +26,8 @@ class NearbyCollectionViewController: UICollectionViewController, UIWebViewDeleg
     var defaultLocation : CLLocation?
     dynamic var bestEffortAtLocation : CLLocation!
     
-    var currentLocation : InstagramLocation?
+    var currentLocation : InstagramLocation! = nil
+    var recentPhotos : [InstagramPhoto]! = nil
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -42,7 +43,7 @@ class NearbyCollectionViewController: UICollectionViewController, UIWebViewDeleg
         // add KVO
         addobservers()
         
-        // set default location to Chicago :)
+        // set default location to the Windy City :)
         defaultLocation = CLLocation(latitude: 41.882584, longitude: -87.623190)
     }
     
@@ -135,6 +136,7 @@ class NearbyCollectionViewController: UICollectionViewController, UIWebViewDeleg
 
     }
     
+//    Gets Instagram access_token from UserDefaults or presents Instagram login screen to user
     func refreshAccessToken() {
         // Once the access token is set, the callback will download photos
         var accessToken : String? = NSUserDefaults.standardUserDefaults().valueForKey("KACCESS_TOKEN_CONSTANT") as String?
@@ -145,6 +147,7 @@ class NearbyCollectionViewController: UICollectionViewController, UIWebViewDeleg
         }
     }
     
+//    Presents a UIWebView to allow user to authenticate into their Instagram account
     func authorizeInstagram() {
         // authenticate
         var fullURL : String! = "\(InstagramConstants().KAUTH_URL_CONSTANT)?client_id=\(InstagramConstants().KCLIENT_ID_CONSTANT)&redirect_uri=\(InstagramConstants().KREDIRECT_URI_CONSTANT)&response_type=token"
@@ -164,21 +167,28 @@ class NearbyCollectionViewController: UICollectionViewController, UIWebViewDeleg
         self.bestEffortAtLocation = defaultLocation
     }
     
+//    Incoming NSNotification that informs the view that the Instagram API found locations with our given CLLocation
     func instagramLocationsLoaded(notification: NSNotification){
-        println("DEBUG: got locations")
-        loadInstagramLocationsToView()
+        println("DEBUG: Downloaded InstagramLocation objects")
+        loadInstagramLocationToView(api.nearbyInstagramLocations.firstObject as InstagramLocation)
     }
     
-    func loadInstagramLocationsToView() {
-        var locations : NSArray = api.nearbyInstagramLocations
-        currentLocation = locations.firstObject as InstagramLocation?
-        for location in locations as [InstagramLocation]{
-            location.downloadAndSaveRecentPhotos({
+//    Loads the given Instagram Location to the view
+    func loadInstagramLocationToView(location : InstagramLocation) {
+        // Set the current location
+        
+        // Remove existing photos from UICollectionView
+        
+        
+        // Dispatch a thread to download & parse metadata for photos at given location
+        location.downloadAndSaveRecentPhotos({ () -> () in
+            NSOperationQueue.mainQueue().addOperationWithBlock({ () -> Void in
+                // On the main queue, reload the UICollectionView
                 
-                }, failure: {
-                    //
-                })
-        }
+            })
+        }, failure: { () -> () in
+            
+        })
     }
     
 //    MARK: UIWebViewDelegate

@@ -21,6 +21,7 @@
 		B37E884919B993C70018B010 /* InstagramLike.swift in Sources */ = {isa = PBXBuildFile; fileRef = B37E884819B993C70018B010 /* InstagramLike.swift */; };
 		B37E884B19B994CE0018B010 /* InstagramUser.swift in Sources */ = {isa = PBXBuildFile; fileRef = B37E884A19B994CE0018B010 /* InstagramUser.swift */; };
 		B37E884D19B99B530018B010 /* InstagramAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = B37E884C19B99B530018B010 /* InstagramAPI.swift */; };
+		B3993E0619BD25EE0036E03D /* placeholder.png in Resources */ = {isa = PBXBuildFile; fileRef = B3993E0519BD25EE0036E03D /* placeholder.png */; };
 		B3B9F0D019B7597300857B6D /* PreviewView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B3B9F0CF19B7597300857B6D /* PreviewView.swift */; };
 /* End PBXBuildFile section */
 
@@ -53,6 +54,7 @@
 		B37E884819B993C70018B010 /* InstagramLike.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = InstagramLike.swift; sourceTree = "<group>"; };
 		B37E884A19B994CE0018B010 /* InstagramUser.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = InstagramUser.swift; sourceTree = "<group>"; };
 		B37E884C19B99B530018B010 /* InstagramAPI.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = InstagramAPI.swift; sourceTree = "<group>"; };
+		B3993E0519BD25EE0036E03D /* placeholder.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = placeholder.png; sourceTree = "<group>"; };
 		B3B9F0CF19B7597300857B6D /* PreviewView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PreviewView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -134,6 +136,7 @@
 		B3303C0119A8228F006D6693 /* FitPlus */ = {
 			isa = PBXGroup;
 			children = (
+				B3993E0319BD259F0036E03D /* Resources */,
 				B336963F19BE3DAF00B7B5CD /* Vendor */,
 				B3251B6219B7CCB600CB2D60 /* API */,
 				B3251B6119B7CCB000CB2D60 /* Models */,
@@ -178,6 +181,22 @@
 				B336964019BE3DB700B7B5CD /* SwiftyJSON.swift */,
 			);
 			name = Vendor;
+			sourceTree = "<group>";
+		};
+		B3993E0319BD259F0036E03D /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				B3993E0419BD25A50036E03D /* Images */,
+			);
+			name = Resources;
+			sourceTree = "<group>";
+		};
+		B3993E0419BD25A50036E03D /* Images */ = {
+			isa = PBXGroup;
+			children = (
+				B3993E0519BD25EE0036E03D /* placeholder.png */,
+			);
+			name = Images;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -262,6 +281,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				B3303C0A19A8228F006D6693 /* Main.storyboard in Resources */,
+				B3993E0619BD25EE0036E03D /* placeholder.png in Resources */,
 				B3303C0C19A8228F006D6693 /* Images.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
