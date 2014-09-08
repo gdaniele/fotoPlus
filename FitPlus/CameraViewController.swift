@@ -88,7 +88,7 @@ class CameraViewController: UIViewController, UIAlertViewDelegate {
                         self.videoDevice = videoDeviceInput!.device
                     }
                 } else {
-                    self.performSegueWithIdentifier("nearbySegue", sender: self)
+                    self.presentViewController(NearbyCollectionViewController(), animated: true, completion: nil)
                 }
                 
                 if ((error) != nil) {
@@ -131,7 +131,7 @@ class CameraViewController: UIViewController, UIAlertViewDelegate {
     
     override func viewDidAppear(animated: Bool) {
         if !UIImagePickerController.isSourceTypeAvailable(UIImagePickerControllerSourceType.Camera) {
-            self.performSegueWithIdentifier("nearbySegue", sender: self)
+            self.presentViewController(NearbyCollectionViewController(), animated: true, completion: nil)
         }
     }
     
@@ -313,7 +313,7 @@ class CameraViewController: UIViewController, UIAlertViewDelegate {
 //    MARK: UIAlertView delegate
     func alertView(alertView: UIAlertView, clickedButtonAtIndex buttonIndex: Int) {
         if buttonIndex == alertView.cancelButtonIndex {
-            self.performSegueWithIdentifier("nearbySegue", sender: self)
+            self.presentViewController(NearbyCollectionViewController(), animated: true, completion: nil)
         }
     }
 }

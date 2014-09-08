@@ -9,36 +9,44 @@
 import UIKit
 import CoreLocation
 
-let reuseIdentifier = "Cell"
+let reuseIdentifier = "photoCell"
 
-class NearbyCollectionViewController: UICollectionViewController, UIWebViewDelegate, CLLocationManagerDelegate {
-    @IBOutlet var photoCollectionView: UICollectionView!
-    
+class NearbyCollectionViewController: UIViewController, UICollectionViewDelegateFlowLayout, UICollectionViewDataSource, CLLocationManagerDelegate, UIWebViewDelegate {
+    var collectionView: UICollectionView?
+    let kImageViewTag : Int = 11 //the imageView for the collectionViewCell is tagged with 1 in IB
     var api : InstagramAPI = InstagramAPI.sharedInstance
-    
     dynamic var accessToken : String!
-
     let activityIndicator : UIActivityIndicatorView! = UIActivityIndicatorView(activityIndicatorStyle: UIActivityIndicatorViewStyle.Gray)
     var webView : UIWebView! = nil
-    
     var manager : CLLocationManager! = CLLocationManager()
     var locationMeasurements : [CLLocation]! = [] //array of CLLocations.. some will be stale
     var defaultLocation : CLLocation?
     dynamic var bestEffortAtLocation : CLLocation!
-    
-    var currentLocation : InstagramLocation! = nil
-    var recentPhotos : [InstagramPhoto]! = nil
+    var locationOnDisplay : InstagramLocation? = nil
+    var stateStatusView : UIView!
+    var cellHeaderHeight : Float = 25
+    var cellFooterHeight : Float = 25
     
     override func viewDidLoad() {
         super.viewDidLoad()
 
         // Uncomment the following line to preserve selection between presentations
         // self.clearsSelectionOnViewWillAppear = false
+        
+        let screenSize = UIScreen.mainScreen().bounds.size
+        var cellWidth = Float(screenSize.width) - 20.0
+        var cellHeight = Float(screenSize.width) - 20.0 + cellHeaderHeight + cellFooterHeight
 
-        // Register cell classes
-        self.collectionView?.registerClass(UICollectionViewCell.self, forCellWithReuseIdentifier: reuseIdentifier)
-
-        // Do any additional setup after loading the view.
+        let layout: UICollectionViewFlowLayout = UICollectionViewFlowLayout()
+        layout.sectionInset = UIEdgeInsets(top: 20, left: 10, bottom: 10, right: 10)
+        layout.itemSize = CGSize(width: CGFloat(cellWidth), height: CGFloat(cellHeight))
+        //add the image view for photo display
+        collectionView = UICollectionView(frame: self.view.frame, collectionViewLayout: layout)
+        collectionView!.dataSource = self
+        collectionView!.delegate = self
+        collectionView!.registerNib(UINib(nibName: "InstagramPhotoCollectionViewCell", bundle: NSBundle.mainBundle()), forCellWithReuseIdentifier: reuseIdentifier)
+        collectionView!.backgroundColor = UIColor.lightGrayColor()
+        self.view.addSubview(collectionView!)
         
         // add KVO
         addobservers()
@@ -61,6 +69,12 @@ class NearbyCollectionViewController: UICollectionViewController, UIWebViewDeleg
         // Dispose of any resources that can be recreated.
     }
 
+    override func viewDidAppear(animated: Bool) {
+        super.viewDidAppear(animated)
+        self.collectionView?.contentInset = UIEdgeInsets(top: 50, left: 0, bottom: 0, right: 0)
+        self.collectionView?.reloadData()
+    }
+
     /*
     // MARK: - Navigation
 
@@ -70,21 +84,35 @@ class NearbyCollectionViewController: UICollectionViewController, UIWebViewDeleg
         // Pass the selected object to the new view controller.
     }
     */
-
+    
     // MARK: UICollectionViewDataSource
-    override func numberOfSectionsInCollectionView(collectionView: UICollectionView) -> Int {
-        return 0
-    }
-
-
-    override func collectionView(collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        //#warning Incomplete method implementation -- Return the number of items in the section
+    func collectionView(collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+        if let location = self.locationOnDisplay as InstagramLocation? {
+            return location.recentPhotos.count
+        }
         return 0
     }
     
-    override func collectionView(collectionView: UICollectionView, cellForItemAtIndexPath indexPath: NSIndexPath) -> UICollectionViewCell {
-        let cell = collectionView.dequeueReusableCellWithReuseIdentifier(reuseIdentifier, forIndexPath: indexPath) as UICollectionViewCell
+    func collectionView(collectionView: UICollectionView, cellForItemAtIndexPath indexPath: NSIndexPath) -> UICollectionViewCell {
+        var screenSize = UIScreen.mainScreen().bounds.size
+        let cell = collectionView.dequeueReusableCellWithReuseIdentifier(reuseIdentifier, forIndexPath: indexPath) as InstagramPhotoCollectionViewCell
         
+//        load the photo for this cell
+        if let location = self.locationOnDisplay {
+            var photo : InstagramPhoto = location.recentPhotos[indexPath.row]
+            
+            if (photo.image != nil) {
+                // Dispatch operation to download the image
+                
+                if let imageView = cell.viewWithTag(kImageViewTag) as? UIImageView {
+                    imageView.image = UIImage(named: "placeholder")
+                }
+            } else {
+                if let imageView = cell.viewWithTag(kImageViewTag) as? UIImageView {
+                    imageView.image = UIImage(named: "placeholder")
+                }
+            }
+        }
         return cell
     }
     
@@ -125,7 +153,6 @@ class NearbyCollectionViewController: UICollectionViewController, UIWebViewDeleg
         self.addObserver(api, forKeyPath: "bestEffortAtLocation", options: NSKeyValueObservingOptions.New, context: nil)
         self.addObserver(self, forKeyPath: "currentLocation", options: NSKeyValueObservingOptions.New, context: nil)
         NSNotificationCenter.defaultCenter().addObserver(self, selector: "instagramLocationsLoaded:", name: "loadedInstagramLocations", object: nil)
-
     }
     
     func removeObservers() {
@@ -133,7 +160,6 @@ class NearbyCollectionViewController: UICollectionViewController, UIWebViewDeleg
         self.removeObserver(api, forKeyPath: "bestEffortAtLocation")
         self.removeObserver(self, forKeyPath: "currentLocation")
         NSNotificationCenter.defaultCenter().removeObserver(self, name: "loadedInstagramLocations", object: nil)
-
     }
     
 //    Gets Instagram access_token from UserDefaults or presents Instagram login screen to user
@@ -162,7 +188,8 @@ class NearbyCollectionViewController: UICollectionViewController, UIWebViewDeleg
         self.view.addSubview(webView)
     }
     
-    func resetLocationLookup() {
+// A location update failure or authorization failure notifies user that default location will be used to find recent photos
+    func relocationOnDisplayLookup() {
         UIAlertView(title: "Instagram error", message: "Can't find this location on Instagram. Defaulting to Chicago", delegate: self, cancelButtonTitle: "OK").show()
         self.bestEffortAtLocation = defaultLocation
     }
@@ -176,7 +203,8 @@ class NearbyCollectionViewController: UICollectionViewController, UIWebViewDeleg
 //    Loads the given Instagram Location to the view
     func loadInstagramLocationToView(location : InstagramLocation) {
         // Set the current location
-        
+        self.locationOnDisplay = location
+
         // Remove existing photos from UICollectionView
         
         
@@ -184,11 +212,36 @@ class NearbyCollectionViewController: UICollectionViewController, UIWebViewDeleg
         location.downloadAndSaveRecentPhotos({ () -> () in
             NSOperationQueue.mainQueue().addOperationWithBlock({ () -> Void in
                 // On the main queue, reload the UICollectionView
-                
+                self.toggleStateStatusView(false, text: nil)
+                self.collectionView?.reloadData()
             })
         }, failure: { () -> () in
             
         })
+    }
+    
+//    Toggles stateStatusView
+    func toggleStateStatusView(enabled : Bool, text : String?) {
+        if enabled{
+            var screenBounds = UIScreen.mainScreen().bounds
+            stateStatusView = UIView(frame: CGRect(x: 0, y: 20, width: screenBounds.size.width, height: screenBounds.size.height - 20))
+            var messageLabel = UILabel(frame: CGRect(x: 0, y: 0, width: 180, height: 100))
+            messageLabel.text = text
+            messageLabel.center = stateStatusView.center
+            messageLabel.font = UIFont(name: "Helvetica Neue", size: 25)
+            messageLabel.lineBreakMode = NSLineBreakMode.ByWordWrapping
+            messageLabel.numberOfLines = 0
+            messageLabel.textAlignment = NSTextAlignment.Center
+            messageLabel.sizeToFit()
+            messageLabel.textColor = UIColor.darkGrayColor()
+            stateStatusView.addSubview(messageLabel)
+            self.view.addSubview(stateStatusView)
+        } else {
+            if self.stateStatusView != nil {
+                self.stateStatusView.removeFromSuperview()
+                self.stateStatusView = nil
+            }
+        }
     }
     
 //    MARK: UIWebViewDelegate
