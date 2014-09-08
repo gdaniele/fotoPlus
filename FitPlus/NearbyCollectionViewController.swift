@@ -23,7 +23,7 @@ class NearbyCollectionViewController: UIViewController, UICollectionViewDelegate
     var webView : UIWebView! = nil //WebView for Instagram login
     var manager : CLLocationManager! = CLLocationManager()
     var locationMeasurements : [CLLocation]! = [] //array of CLLocations.. some will be stale
-    var defaultLocation : CLLocation? // Fallback CLLocation for app for when GPS is not available
+    var defaultLocation : CLLocation = InstagramAPI.sharedInstance.defaultLocation // Fallback CLLocation for app for when GPS is not available
     dynamic var bestEffortAtLocation : CLLocation! // Keeps track of most accurate GPS reading
     var locationOnDisplay : InstagramLocation? = nil // Current Location ID (Instagram) of recent photo feed currently on screen
     var indexOfLocation : Int! = 0 // We have multiple Instagram locations for a plae. The index is which one is loaded
@@ -51,9 +51,6 @@ class NearbyCollectionViewController: UIViewController, UICollectionViewDelegate
         // add KVO
         addobservers()
         
-        // set default location to the Windy City :)
-        defaultLocation = CLLocation(latitude: 41.882584, longitude: -87.623190)
-        
         //set up uinavigation bar
         navBar = UINavigationBar()
         navBar.frame = CGRectMake(0, 20, self.view.frame.size.width, 44)
@@ -62,7 +59,6 @@ class NearbyCollectionViewController: UIViewController, UICollectionViewDelegate
         //navbar titles and location swapping
         var item = UINavigationItem(title: "Loading Nearby Photos..")
         if UIImagePickerController.isSourceTypeAvailable(UIImagePickerControllerSourceType.Camera) {
-            var item = UINavigationItem(title: "SUPP")
             item.rightBarButtonItem = UIBarButtonItem(barButtonSystemItem: UIBarButtonSystemItem.Camera, target: self, action: "loadCamera")
         }
         navBar.pushNavigationItem(item, animated: true)
@@ -266,7 +262,7 @@ class NearbyCollectionViewController: UIViewController, UICollectionViewDelegate
     
 // A location update failure or authorization failure notifies user that default location will be used to find recent photos
     func relocationOnDisplayLookup() {
-        UIAlertView(title: "Instagram error", message: "Can't find this location on Instagram. Defaulting to Chicago", delegate: self, cancelButtonTitle: "OK").show()
+        UIAlertView(title: "Instagram error", message: "Can't find this location on Instagram. Defaulting to Sydney", delegate: self, cancelButtonTitle: "OK").show()
         self.bestEffortAtLocation = defaultLocation
     }
     

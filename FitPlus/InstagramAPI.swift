@@ -18,7 +18,7 @@ class InstagramAPI: NSObject {
     }
     var token : String!
     var savedLocation : CLLocation!
-    var defaultLocation : CLLocation = CLLocation(latitude: 41.882584, longitude: -87.623190)
+    var defaultLocation : CLLocation = CLLocation(latitude: -33.856689, longitude: 151.2152941)
     var nearbyInstagramLocations : NSMutableArray = NSMutableArray()
     var constantsInstance : InstagramConstants = InstagramConstants()
     var delegate = UIApplication.sharedApplication().delegate as AppDelegate
