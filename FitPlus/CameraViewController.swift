@@ -316,4 +316,10 @@ class CameraViewController: UIViewController, UIAlertViewDelegate {
             self.presentViewController(NearbyCollectionViewController(), animated: true, completion: nil)
         }
     }
+    
+//    IBOutlet Actions
+    @IBAction func nearbyButtonPressed(sender: AnyObject) {
+        self.presentViewController(NearbyCollectionViewController(), animated: true, completion: nil)
+
+    }
 }

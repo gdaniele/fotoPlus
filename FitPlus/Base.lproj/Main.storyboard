@@ -8,7 +8,7 @@
         <!--Camera View Controller-->
         <scene sceneID="14q-IQ-2bu">
             <objects>
-                <viewController id="dS1-yy-Nn9" customClass="CameraViewController" customModule="FitPlus" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController restorationIdentifier="snapController" storyboardIdentifier="snapController" id="dS1-yy-Nn9" customClass="CameraViewController" customModule="FitPlus" customModuleProvider="target" sceneMemberID="viewController">
                     <layoutGuides>
                         <viewControllerLayoutGuide type="top" id="wzt-u9-a1o"/>
                         <viewControllerLayoutGuide type="bottom" id="OCY-Uy-ZlJ"/>
@@ -53,6 +53,9 @@
                                             <color key="titleColor" red="0.34671804470000001" green="1" blue="0.027302480380000001" alpha="1" colorSpace="calibratedRGB"/>
                                             <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
                                         </state>
+                                        <connections>
+                                            <action selector="nearbyButtonPressed:" destination="dS1-yy-Nn9" eventType="touchUpInside" id="wHN-By-puZ"/>
+                                        </connections>
                                     </button>
                                 </subviews>
                                 <color key="backgroundColor" white="0.0" alpha="1" colorSpace="calibratedWhite"/>
@@ -89,7 +92,7 @@
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="oAk-4u-oHl" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="1179" y="551.25"/>
+            <point key="canvasLocation" x="542" y="475"/>
         </scene>
     </scenes>
 </document>

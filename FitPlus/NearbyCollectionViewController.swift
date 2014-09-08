@@ -11,11 +11,12 @@ import CoreLocation
 
 let reuseIdentifier = "photoCell"
 
-class NearbyCollectionViewController: UIViewController, UICollectionViewDelegateFlowLayout, UICollectionViewDataSource, CLLocationManagerDelegate, UIWebViewDelegate {
+class NearbyCollectionViewController: UIViewController, UICollectionViewDelegateFlowLayout, UICollectionViewDataSource, CLLocationManagerDelegate, UIWebViewDelegate, UINavigationBarDelegate {
     var collectionView: UICollectionView?
     let kImageViewTag : Int = 11 //the imageView for the collectionViewCell is tagged with 11 in IB
     let kHeaderViewTag : Int = 33 //the header for the collectionViewCell is tagged with 33 in IB
     let kFooterViewTag : Int = 22 //the footer for the collectionViewCell is tagged with 22 in IB
+    let kNavbarTag : Int = 87
     var api : InstagramAPI = InstagramAPI.sharedInstance //shared instance of our api helper. it also manages the access_token from instagram
     dynamic var accessToken : String! //dynamic KVO variable that sets access_token from UIWebView presented in this controller
     let activityIndicator : UIActivityIndicatorView! = UIActivityIndicatorView(activityIndicatorStyle: UIActivityIndicatorViewStyle.Gray) //for loading UIWebView
@@ -25,8 +26,9 @@ class NearbyCollectionViewController: UIViewController, UICollectionViewDelegate
     var defaultLocation : CLLocation? // Fallback CLLocation for app for when GPS is not available
     dynamic var bestEffortAtLocation : CLLocation! // Keeps track of most accurate GPS reading
     var locationOnDisplay : InstagramLocation? = nil // Current Location ID (Instagram) of recent photo feed currently on screen
+    var indexOfLocation : Int! = 0 // We have multiple Instagram locations for a plae. The index is which one is loaded
     var stateStatusView : UIView! // UIView overlay that communicates state messages to user
-
+    var navBar : UINavigationBar!
     var imageDownloadsInProgress = Dictionary<NSIndexPath, PhotoDownloader>() // Mutable data structure of images currently being downloaded. We are lazy loading!
     
     override func viewDidLoad() {
@@ -51,6 +53,27 @@ class NearbyCollectionViewController: UIViewController, UICollectionViewDelegate
         
         // set default location to the Windy City :)
         defaultLocation = CLLocation(latitude: 41.882584, longitude: -87.623190)
+        
+        //set up uinavigation bar
+        navBar = UINavigationBar()
+        navBar.frame = CGRectMake(0, 20, self.view.frame.size.width, 44)
+        navBar.barTintColor = UIColor.lightGrayColor()
+        navBar.delegate = self
+        
+        var item = UINavigationItem(title: "PicsNearMe")
+        if UIImagePickerController.isSourceTypeAvailable(UIImagePickerControllerSourceType.Camera) {
+            var rightButton = UIBarButtonItem(title: "Snap", style: UIBarButtonItemStyle.Plain, target: self, action: "loadCamera")
+            item.rightBarButtonItem = rightButton
+            item.hidesBackButton = true
+        }
+        navBar.pushNavigationItem(item, animated: true)
+        var navSingleTap = UITapGestureRecognizer(target: self, action: "navSingleTap")
+        navSingleTap.numberOfTapsRequired = 1
+        (navBar.subviews[1] as UIView).userInteractionEnabled = true
+        (navBar.subviews[1] as UIView).addGestureRecognizer(navSingleTap)
+        navBar.tag = kNavbarTag
+        
+        self.view.addSubview(navBar)
     }
     
     override func viewDidDisappear(animated: Bool) {
@@ -88,6 +111,18 @@ class NearbyCollectionViewController: UIViewController, UICollectionViewDelegate
         // Pass the selected object to the new view controller.
     }
     */
+    
+    func loadCamera() {
+        var story = UIStoryboard(name: "Main", bundle: NSBundle.mainBundle())
+        var snapController = story.instantiateViewControllerWithIdentifier("snapController") as CameraViewController
+        snapController.modalPresentationStyle = UIModalPresentationStyle.FullScreen
+        self.presentViewController(snapController as UIViewController, animated: true, completion: nil)
+    }
+    
+    func navSingleTap() {
+        indexOfLocation = (indexOfLocation + 1) % api.nearbyInstagramLocations.count
+        loadInstagramLocationToView(api.nearbyInstagramLocations[indexOfLocation] as InstagramLocation)
+    }
     
     // MARK: UICollectionViewDataSource
     func collectionView(collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
@@ -232,7 +267,7 @@ class NearbyCollectionViewController: UIViewController, UICollectionViewDelegate
 //    Incoming NSNotification that informs the view that the Instagram API found locations with our given CLLocation
     func instagramLocationsLoaded(notification: NSNotification){
         println("DEBUG: Downloaded InstagramLocation objects")
-        loadInstagramLocationToView(api.nearbyInstagramLocations.firstObject as InstagramLocation)
+        loadInstagramLocationToView(api.nearbyInstagramLocations[indexOfLocation] as InstagramLocation)
     }
     
 //    Loads the given Instagram Location to the view
@@ -240,15 +275,16 @@ class NearbyCollectionViewController: UIViewController, UICollectionViewDelegate
         // Set the current location
         self.locationOnDisplay = location
 
-        // Remove existing photos from UICollectionView
-        
-        
         // Dispatch a thread to download & parse metadata for photos at given location
         location.downloadAndSaveRecentPhotos({ () -> () in
             NSOperationQueue.mainQueue().addOperationWithBlock({ () -> Void in
                 // On the main queue, reload the UICollectionView
-                self.toggleStateStatusView(false, text: nil)
-                self.collectionView?.reloadData()
+                if self.locationOnDisplay?.recentPhotos.count < 1 {
+                    self.navSingleTap()
+                } else {
+                    self.navBar.topItem?.title = self.locationOnDisplay?.name
+                    self.collectionView?.reloadData()
+                }
             })
         }, failure: { () -> () in
             
@@ -357,5 +393,10 @@ class NearbyCollectionViewController: UIViewController, UICollectionViewDelegate
             bestEffortAtLocation = defaultLocation
         }
         println("Location Authorization changed to: \(status.toRaw())")
+    }
+    
+//    UINavigationBar Delegates
+    func positionForBar(bar: UIBarPositioning) -> UIBarPosition {
+        return UIBarPosition.TopAttached
     }
 }
