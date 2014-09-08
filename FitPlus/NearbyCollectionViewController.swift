@@ -135,42 +135,45 @@ class NearbyCollectionViewController: UIViewController, UICollectionViewDelegate
         
 //        Load the photo for this cell
         if let location = self.locationOnDisplay {
-            var photo : InstagramPhoto = location.recentPhotos[indexPath.row]
-            if let likesCount : Int = photo.likeCount {
-                cell.likesCountLabel.text = String(likesCount) + " likes"
-            } else {
-                cell.likesCountLabel.text = ""
-            }
-            if let id : String = photo.id {
-                cell.mediaID = id
-            } else {
-                println("ERROR: cell without mediaID")
-            }
-            if let username : String = photo.user?.username {
-                cell.usernameLabel.text = username
-            } else {
-                cell.usernameLabel.text = ""
-            }
-            if let createdAt : NSDate = photo.createdAt {
-                var formatter : NSDateFormatter = NSDateFormatter()
-                formatter.dateFormat = "MM/dd/yyyy"
-                cell.timeAgoLabel.text = formatter.stringFromDate(createdAt)
-            } else {
-                cell.usernameLabel.text = ""
-            }
-            if (photo.image == nil) {
-                // Dispatch operation to download the image
-                if self.collectionView?.dragging == false && self.collectionView?.decelerating == false
-                {
-                    startPhotoDownload(photo, indexPath: indexPath)
+            if location.recentPhotos.count >= indexPath.row {
+                var photo : InstagramPhoto = location.recentPhotos[indexPath.row]
+                if let likesCount : Int = photo.likeCount {
+                    cell.likesCountLabel.text = String(likesCount) + " likes"
+                } else {
+                    cell.likesCountLabel.text = ""
                 }
-                if let imageView = cell.viewWithTag(kImageViewTag) as? UIImageView {
-                    imageView.image = UIImage(named: "placeholder")
+                if let id : String = photo.id {
+                    cell.mediaID = id
+                } else {
+                    println("ERROR: cell without mediaID")
                 }
-            } else {
-                if let imageView = cell.viewWithTag(kImageViewTag) as? UIImageView {
-                    imageView.image = photo.image
+                if let username : String = photo.user?.username {
+                    cell.usernameLabel.text = username
+                } else {
+                    cell.usernameLabel.text = ""
                 }
+                if let createdAt : NSDate = photo.createdAt {
+                    var formatter : NSDateFormatter = NSDateFormatter()
+                    formatter.dateFormat = "MM/dd/yyyy"
+                    cell.timeAgoLabel.text = formatter.stringFromDate(createdAt)
+                } else {
+                    cell.usernameLabel.text = ""
+                }
+                if (photo.image == nil) {
+                    // Dispatch operation to download the image
+                    if self.collectionView?.dragging == false && self.collectionView?.decelerating == false
+                    {
+                        startPhotoDownload(photo, indexPath: indexPath)
+                    }
+                    if let imageView = cell.viewWithTag(kImageViewTag) as? UIImageView {
+                        imageView.image = UIImage(named: "placeholder")
+                    }
+                } else {
+                    if let imageView = cell.viewWithTag(kImageViewTag) as? UIImageView {
+                        imageView.image = photo.image
+                    }
+                }
+
             }
         }
         return cell
