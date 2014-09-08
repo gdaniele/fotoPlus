@@ -45,7 +45,7 @@ class NearbyCollectionViewController: UIViewController, UICollectionViewDelegate
         collectionView!.dataSource = self
         collectionView!.delegate = self
         collectionView!.registerNib(UINib(nibName: "InstagramPhotoCollectionViewCell", bundle: NSBundle.mainBundle()), forCellWithReuseIdentifier: reuseIdentifier)
-        collectionView!.backgroundColor = UIColor.lightGrayColor()
+        collectionView!.backgroundColor = UIColor.whiteColor()
         self.view.addSubview(collectionView!)
         
         // add KVO
