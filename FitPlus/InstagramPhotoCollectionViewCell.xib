@@ -24,18 +24,22 @@
                                 <color key="textColor" red="0.39363440690000001" green="0.39363440690000001" blue="0.39363440690000001" alpha="1" colorSpace="calibratedRGB"/>
                                 <nil key="highlightedColor"/>
                             </label>
-                            <button opaque="NO" contentMode="scaleToFill" ambiguous="YES" misplaced="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="q7b-Gl-3nW">
+                            <button opaque="NO" contentMode="scaleToFill" misplaced="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="q7b-Gl-3nW">
                                 <rect key="frame" x="404" y="-1" width="30" height="30"/>
                                 <fontDescription key="fontDescription" name="HelveticaNeue-Medium" family="Helvetica Neue" pointSize="15"/>
                                 <state key="normal" title="Like">
                                     <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
                                 </state>
+                                <connections>
+                                    <action selector="likeButtonPressed:" destination="gTV-IL-0wX" eventType="touchUpInside" id="Epi-Ze-Bst"/>
+                                </connections>
                             </button>
                         </subviews>
                         <constraints>
+                            <constraint firstAttribute="trailing" secondItem="q7b-Gl-3nW" secondAttribute="trailing" constant="5" id="Rt6-UC-bru"/>
                             <constraint firstItem="eWb-j8-Rsj" firstAttribute="leading" secondItem="b4n-aO-ZWY" secondAttribute="leading" constant="5" id="VAY-9F-TlE"/>
-                            <constraint firstItem="eWb-j8-Rsj" firstAttribute="centerY" secondItem="q7b-Gl-3nW" secondAttribute="centerY" id="aqB-By-N1t"/>
                             <constraint firstItem="eWb-j8-Rsj" firstAttribute="centerY" secondItem="b4n-aO-ZWY" secondAttribute="centerY" id="kMT-WF-lWG"/>
+                            <constraint firstItem="q7b-Gl-3nW" firstAttribute="centerY" secondItem="eWb-j8-Rsj" secondAttribute="centerY" id="sgO-eE-mKb"/>
                         </constraints>
                     </view>
                     <view tag="33" contentMode="scaleToFill" misplaced="YES" translatesAutoresizingMaskIntoConstraints="NO" id="RWa-dG-ATr" userLabel="Header View">

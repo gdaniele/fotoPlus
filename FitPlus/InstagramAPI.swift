@@ -20,6 +20,7 @@ class InstagramAPI: NSObject {
     var savedLocation : CLLocation!
     var defaultLocation : CLLocation = CLLocation(latitude: 41.882584, longitude: -87.623190)
     var nearbyInstagramLocations : NSMutableArray = NSMutableArray()
+    var constantsInstance : InstagramConstants = InstagramConstants()
 
     override func observeValueForKeyPath(keyPath: String!, ofObject object: AnyObject!, change: [NSObject : AnyObject]!, context: UnsafeMutablePointer<Void>) {
         println("keyPath \(keyPath) changed: \(change[NSKeyValueChangeNewKey])")
@@ -67,6 +68,66 @@ class InstagramAPI: NSObject {
             // request failed
             failure()
         }
+    }
+    
+    class func likeRequestForPhoto(mediaID : String, success: (NSDictionary) -> (), failure: () -> ()) {
+        var urlString : String! = "\(InstagramConstants().KAPI_URL_MEDIA_CONSTANT)\(mediaID)/likes"
+        var url : NSURL = NSURL(string: urlString)
+        InstagramAPI.sharedInstance.postRequestWithCallback(url, success: { (json) -> () in
+            success(json)
+        }) { () -> () in
+            failure()
+        }
+    }
+    
+    func postRequestWithCallback(url : NSURL, success : (NSDictionary) -> (), failure: () -> ()) {
+        var defaultSession : NSURLSession = NSURLSession.sharedSession()
+        var urlRequest = NSMutableURLRequest(URL: url)
+        if let token : String! = InstagramAPI.sharedInstance.token {
+            let postData = ("access_token=\(token)" as NSString).dataUsingEncoding(NSUTF8StringEncoding)
+            urlRequest.HTTPMethod = "POST"
+            urlRequest.HTTPBody = postData
+            var curlString = getCurl(urlRequest)
+            defaultSession.dataTaskWithRequest(urlRequest, completionHandler: { (data, response, error) -> Void in
+                if (error != nil) {
+                    println("ERROR: \(error)")
+                    failure()
+                } else {
+                    var httpResponse : NSHTTPURLResponse = response as NSHTTPURLResponse
+                    if httpResponse.statusCode == 200 {
+                        // this has to be done in ObjC Foundation!
+                        var json : NSDictionary = NSJSONSerialization.JSONObjectWithData(data, options: NSJSONReadingOptions.convertFromNilLiteral(), error: nil) as NSDictionary
+                        success(json)
+                    } else {
+                        println("ERROR: HTTP Response: \(httpResponse)")
+                        // TODO: Reachability request here to make sure server is reachable. If callback succeeds, retry
+                        
+                        // for now, let's just try again. instagram api fails randomly and needs to be retried :(
+                        self.requestWithCallback(url, success: success, failure: failure)
+                        failure()
+                    }
+                }
+                
+            }).resume()
+        }
+    }
+    
+    func getCurl(request : NSMutableURLRequest) -> String {
+        var curlString = "curl -k -X \(request.HTTPMethod) --dump-header -"
+        for (key, obj) in request.allHTTPHeaderFields as Dictionary<String, String> {
+            curlString = curlString + " -H \"\(key) : \(obj)\""
+        }
+        if let bodyData : NSData = request.HTTPBody {
+            var data : String? = NSString(data: bodyData, encoding: NSUTF8StringEncoding) as String?
+            
+            if data != nil {
+                curlString = curlString + " -d \"\(data!)\""
+            }
+        }
+        if let url : NSURL = request.URL {
+            curlString = curlString + " \(url.absoluteString!)"
+        }
+        return curlString
     }
     
     func requestWithCallback(url : NSURL, success: (NSDictionary) -> (), failure: () -> ()) {

@@ -57,9 +57,17 @@ class NearbyCollectionViewController: UIViewController, UICollectionViewDelegate
         //set up uinavigation bar
         navBar = UINavigationBar()
         navBar.frame = CGRectMake(0, 20, self.view.frame.size.width, 44)
-        navBar.barTintColor = UIColor.lightGrayColor()
         navBar.delegate = self
         
+        //navbar appearance
+        var navigationBarAppearace = UINavigationBar.appearance()
+        navigationBarAppearace.tintColor = UIColor.greenColor()
+        navigationBarAppearace.barTintColor = UIColor.greenColor()
+        // change navigation item title color
+        navigationBarAppearace.titleTextAttributes = [NSForegroundColorAttributeName:UIColor.whiteColor()]
+        UIApplication.sharedApplication().statusBarStyle = UIStatusBarStyle.LightContent
+        
+        //navbar titles and location swapping
         var item = UINavigationItem(title: "PicsNearMe")
         if UIImagePickerController.isSourceTypeAvailable(UIImagePickerControllerSourceType.Camera) {
             var rightButton = UIBarButtonItem(title: "Snap", style: UIBarButtonItemStyle.Plain, target: self, action: "loadCamera")
@@ -120,8 +128,10 @@ class NearbyCollectionViewController: UIViewController, UICollectionViewDelegate
     }
     
     func navSingleTap() {
-        indexOfLocation = (indexOfLocation + 1) % api.nearbyInstagramLocations.count
-        loadInstagramLocationToView(api.nearbyInstagramLocations[indexOfLocation] as InstagramLocation)
+        if self.locationOnDisplay?.recentPhotos.count > 0 {
+            indexOfLocation = (indexOfLocation + 1) % api.nearbyInstagramLocations.count
+            loadInstagramLocationToView(api.nearbyInstagramLocations[indexOfLocation] as InstagramLocation)
+        }
     }
     
     // MARK: UICollectionViewDataSource
@@ -136,13 +146,18 @@ class NearbyCollectionViewController: UIViewController, UICollectionViewDelegate
         var screenSize = UIScreen.mainScreen().bounds.size
         let cell = collectionView.dequeueReusableCellWithReuseIdentifier(reuseIdentifier, forIndexPath: indexPath) as InstagramPhotoCollectionViewCell
         
-//        load the photo for this cell
+//        Load the photo for this cell
         if let location = self.locationOnDisplay {
             var photo : InstagramPhoto = location.recentPhotos[indexPath.row]
             if let likesCount : Int = photo.likeCount {
                 cell.likesCountLabel.text = String(likesCount) + " likes"
             } else {
                 cell.likesCountLabel.text = ""
+            }
+            if let id : String = photo.id {
+                cell.mediaID = id
+            } else {
+                println("ERROR: cell without mediaID")
             }
             if let username : String = photo.user?.username {
                 cell.usernameLabel.text = username
@@ -246,7 +261,7 @@ class NearbyCollectionViewController: UIViewController, UICollectionViewDelegate
 //    Presents a UIWebView to allow user to authenticate into their Instagram account
     func authorizeInstagram() {
         // authenticate
-        var fullURL : String! = "\(InstagramConstants().KAUTH_URL_CONSTANT)?client_id=\(InstagramConstants().KCLIENT_ID_CONSTANT)&redirect_uri=\(InstagramConstants().KREDIRECT_URI_CONSTANT)&response_type=token"
+        var fullURL : String! = "\(InstagramConstants().KAUTH_URL_CONSTANT)?client_id=\(InstagramConstants().KCLIENT_ID_CONSTANT)&redirect_uri=\(InstagramConstants().KREDIRECT_URI_CONSTANT)&scope=likes&response_type=token"
         var url : NSURL = NSURL(string: fullURL)
         var requestObject = NSURLRequest(URL: url)
         var screenBounds = UIScreen.mainScreen().bounds
@@ -398,5 +413,13 @@ class NearbyCollectionViewController: UIViewController, UICollectionViewDelegate
 //    UINavigationBar Delegates
     func positionForBar(bar: UIBarPositioning) -> UIBarPosition {
         return UIBarPosition.TopAttached
+    }
+    
+    func uicolorFromHex(rgbValue:UInt32)->UIColor{
+        let red = CGFloat((rgbValue & 0xFF0000) >> 16)/256.0
+        let green = CGFloat((rgbValue & 0xFF00) >> 8)/256.0
+        let blue = CGFloat(rgbValue & 0xFF)/256.0
+        
+        return UIColor(red:red, green:green, blue:blue, alpha:1.0)
     }
 }

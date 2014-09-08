@@ -9,6 +9,7 @@
 import UIKit
 
 class InstagramPhotoCollectionViewCell: UICollectionViewCell {
+    var mediaID : String?
     @IBOutlet weak var imageView: UIImageView!
     @IBOutlet weak var usernameLabel: UILabel!
     @IBOutlet weak var timeAgoLabel: UILabel!
@@ -18,5 +19,19 @@ class InstagramPhotoCollectionViewCell: UICollectionViewCell {
     override func awakeFromNib() {
         super.awakeFromNib()
         // Initialization code
+    }
+    
+    @IBAction func likeButtonPressed(sender: AnyObject) {
+        if let id : String = self.mediaID {
+            InstagramAPI.likeRequestForPhoto(id, success: { (json) -> () in
+                var data = JSONValue(json)
+                println("DEBUG: Photo was liked successfully")
+                NSOperationQueue.mainQueue().addOperationWithBlock({ () -> Void in
+                    self.likeButton.setTitle("You liked this", forState: UIControlState.Normal)
+                })
+            }) { () -> () in
+                    //
+            }
+        }
     }
 }

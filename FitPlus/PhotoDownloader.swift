@@ -16,7 +16,7 @@ class PhotoDownloader: NSObject, NSURLSessionDownloadDelegate {
     
     func startDownload() {
         if let imageSession : NSURLSession = self.imageSession {
-            self.imageDownload = imageSession.downloadTaskWithURL(NSURL(string: photo!.linkLowRes!))
+            self.imageDownload = imageSession.downloadTaskWithURL(NSURL(string: photo!.linkStandardRes!))
             self.imageDownload?.resume()
         } else {
             self.imageSession = NSURLSession(configuration: NSURLSessionConfiguration.defaultSessionConfiguration(), delegate : self, delegateQueue: nil)

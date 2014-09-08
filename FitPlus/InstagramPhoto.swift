@@ -15,7 +15,7 @@ class InstagramPhoto: NSObject {
     
     var user : InstagramUser?
 
-    var id : Int!
+    var id : String!
     
     var linkLowRes : String! = nil
     var linkStandardRes : String! = nil
@@ -55,7 +55,7 @@ class InstagramPhoto: NSObject {
             self.user = InstagramUser(fromDictionary: userObject)
         }
         if let idString = json["id"].string {
-            self.id = idString.toInt()
+            self.id = idString
         }
         if let lowResString = json["images"]["low_resolution"]["url"].string {
             self.linkLowRes = lowResString
