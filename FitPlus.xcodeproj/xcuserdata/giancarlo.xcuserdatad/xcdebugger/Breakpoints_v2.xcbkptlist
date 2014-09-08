@@ -9,13 +9,13 @@
             shouldBeEnabled = "Yes"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
-            filePath = "FitPlus/InstagramPhoto.swift"
-            timestampString = "431897714.186099"
+            filePath = "FitPlus/InstagramLocation.swift"
+            timestampString = "431908062.452988"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "28"
-            endingLineNumber = "28"
-            landmarkName = "init(fromDictionary:)"
+            startingLineNumber = "54"
+            endingLineNumber = "54"
+            landmarkName = "parseAndSavePhotos(_:success:failure:)"
             landmarkType = "5">
          </BreakpointContent>
       </BreakpointProxy>

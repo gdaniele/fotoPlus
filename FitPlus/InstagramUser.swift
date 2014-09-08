@@ -18,11 +18,30 @@ class InstagramUser: NSObject {
     
     var profilePic : UIImage?
 
-    init(fromDictionary data : Dictionary<String, AnyObject>) {
-//        self.bio = data.objectForKey("bio") as? String
-//        self.full_name = data.objectForKey("full_name") as? String
-//        self.id = data.objectForKey("id") as? Int
-//        self.profilePicLink = data.objectForKey("profile_picture") as? String
-//        self.website = data.objectForKey("website") as? String
+    init(fromDictionary data : Dictionary<String, JSONValue>) {
+        if let bio = data["bio"]?.string {
+            self.bio = bio
+        }
+        if let fullName = data["full_name"]?.string {
+            self.full_name = fullName
+        }
+        if let id = data["id"]?.number {
+            self.id = id
+        }
+        if let id = data["id"]?.string {
+            self.id = id.toInt()
+        }
+        if let bio = data["bio"]?.string {
+            self.bio = bio
+        }
+        if let website = data["website"]?.string {
+            self.website = website
+        }
+        if let profilePic = data["profile_picture"]?.string {
+            self.profilePicLink = profilePic
+        }
+        if let username = data["username"]?.string {
+            self.username = username
+        }
     }
 }

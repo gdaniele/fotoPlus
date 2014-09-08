@@ -50,9 +50,8 @@ class InstagramLocation: NSObject {
     // Takes Instagram Media response as params and creates instagramPhoto objects
     func parseAndSavePhotos(json : NSDictionary, success : () -> (), failure : () -> ()) {
         for photo in json["data"] as NSArray {
-            var swiftDict = (photo as NSDictionary) as Dictionary<String, AnyObject>
-            var photo : InstagramPhoto = InstagramPhoto(fromDictionary: swiftDict)
-            println("got da photo")
+            var photo : InstagramPhoto = InstagramPhoto(fromDictionary: JSONValue(photo))
+            println("got one")
         }
     }
 }
