@@ -12,10 +12,17 @@ class InstagramUser: NSObject {
     var username : String! = nil
     var full_name : String?
     var id : Int?
+    var bio : String?
+    var profilePicLink : String?
+    var website : String?
     
-    init(username: String, userId : Int, full_name : String, id : Int) {
-        self.id = userId
-        self.username = username
-        self.full_name = full_name
+    var profilePic : UIImage?
+
+    init(fromDictionary data : Dictionary<String, AnyObject>) {
+//        self.bio = data.objectForKey("bio") as? String
+//        self.full_name = data.objectForKey("full_name") as? String
+//        self.id = data.objectForKey("id") as? Int
+//        self.profilePicLink = data.objectForKey("profile_picture") as? String
+//        self.website = data.objectForKey("website") as? String
     }
 }

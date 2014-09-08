@@ -16,7 +16,7 @@ class InstagramLocation: NSObject {
     var lng : CLLocationDegrees!
     var id : Int!
     
-    var recentPhotos : [Int]? // stores ten most recent photos at location
+    var recentPhotos : [InstagramPhoto]? // stores ten most recent photos at location
     
     init(name: String, location : CLLocation, lat : CLLocationDegrees?, lng : CLLocationDegrees?, id : Int) {
         self.name = name
@@ -33,7 +33,26 @@ class InstagramLocation: NSObject {
         }
     }
     
-    func loadPhotos() {
-        true
+    func downloadAndSaveRecentPhotos(success: () -> (), failure: () -> ()) {
+        InstagramAPI.requestRecentPhotosFromLocation(String(self.id), success: { (json) -> () in
+            println("DEBUG: got photos for location id: \(self.id) \n da photos: \(json)")
+            //save the photos in the background
+            var backgroundQueue = NSOperationQueue()
+            backgroundQueue.addOperationWithBlock({ () -> Void in
+                self.parseAndSavePhotos(json, success, failure)
+            })
+        }) { () -> () in
+            //failure! 
+            failure()
+        }
+    }
+    
+    // Takes Instagram Media response as params and creates instagramPhoto objects
+    func parseAndSavePhotos(json : NSDictionary, success : () -> (), failure : () -> ()) {
+        for photo in json["data"] as NSArray {
+            var swiftDict = (photo as NSDictionary) as Dictionary<String, AnyObject>
+            var photo : InstagramPhoto = InstagramPhoto(fromDictionary: swiftDict)
+            println("got da photo")
+        }
     }
 }

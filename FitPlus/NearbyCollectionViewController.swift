@@ -14,7 +14,7 @@ let reuseIdentifier = "Cell"
 class NearbyCollectionViewController: UICollectionViewController, UIWebViewDelegate, CLLocationManagerDelegate {
     @IBOutlet var photoCollectionView: UICollectionView!
     
-    var api : InstagramAPI = InstagramAPI()
+    var api : InstagramAPI = InstagramAPI.sharedInstance
     
     dynamic var accessToken : String!
 
@@ -25,6 +25,8 @@ class NearbyCollectionViewController: UICollectionViewController, UIWebViewDeleg
     var locationMeasurements : [CLLocation]! = [] //array of CLLocations.. some will be stale
     var defaultLocation : CLLocation?
     dynamic var bestEffortAtLocation : CLLocation!
+    
+    var currentLocation : InstagramLocation?
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -118,16 +120,16 @@ class NearbyCollectionViewController: UICollectionViewController, UIWebViewDeleg
     
 //    MARK: Utilities
     func addobservers() {
-        self.addObserver(self.api, forKeyPath: "accessToken", options: NSKeyValueObservingOptions.New, context: nil)
-        self.addObserver(self.api, forKeyPath: "bestEffortAtLocation", options: NSKeyValueObservingOptions.New, context: nil)
+        self.addObserver(api, forKeyPath: "accessToken", options: NSKeyValueObservingOptions.New, context: nil)
+        self.addObserver(api, forKeyPath: "bestEffortAtLocation", options: NSKeyValueObservingOptions.New, context: nil)
         self.addObserver(self, forKeyPath: "currentLocation", options: NSKeyValueObservingOptions.New, context: nil)
         NSNotificationCenter.defaultCenter().addObserver(self, selector: "instagramLocationsLoaded:", name: "loadedInstagramLocations", object: nil)
 
     }
     
     func removeObservers() {
-        self.removeObserver(self.api, forKeyPath: "accessToken")
-        self.removeObserver(self.api, forKeyPath: "bestEffortAtLocation")
+        self.removeObserver(api, forKeyPath: "accessToken")
+        self.removeObserver(api, forKeyPath: "bestEffortAtLocation")
         self.removeObserver(self, forKeyPath: "currentLocation")
         NSNotificationCenter.defaultCenter().removeObserver(self, name: "loadedInstagramLocations", object: nil)
 
@@ -163,7 +165,20 @@ class NearbyCollectionViewController: UICollectionViewController, UIWebViewDeleg
     }
     
     func instagramLocationsLoaded(notification: NSNotification){
-        var locations : NSMutableArray = InstagramAPI.sharedInstance.nearbyInstagramLocations
+        println("DEBUG: got locations")
+        loadInstagramLocationsToView()
+    }
+    
+    func loadInstagramLocationsToView() {
+        var locations : NSArray = api.nearbyInstagramLocations
+        currentLocation = locations.firstObject as InstagramLocation?
+        for location in locations as [InstagramLocation]{
+            location.downloadAndSaveRecentPhotos({
+                
+                }, failure: {
+                    //
+                })
+        }
     }
     
 //    MARK: UIWebViewDelegate
@@ -230,7 +245,6 @@ class NearbyCollectionViewController: UICollectionViewController, UIWebViewDeleg
                 manager.stopUpdatingLocation()
             }
         }
-//        TODO: Update the collectionView here with maybe a new network call
     }
     
     func locationManager(manager: CLLocationManager!, didFailWithError error: NSError!) {

@@ -10,14 +10,31 @@ import UIKit
 
 class InstagramPhoto: NSObject {
     var caption : String?
-    var likes : [Int]?
-    var link : String! = nil
-    var userId : Int?
+    var likeCount : Int?
+    var createdAt : NSDate?
+    var user : InstagramUser?
+
     var id : Int!
     
-    init(caption: String, likes : [Int], id : Int) {
-        self.likes = likes
-        self.caption = caption
-        self.id = id
+    var linkLowRes : String! = nil
+    var linkStandardRes : String! = nil
+    var link : String! = nil
+    var type : String! = nil
+    
+    var image : UIImage? = nil
+    
+    init(fromDictionary photoData : Dictionary<String, AnyObject>) {
+        var captionObject: AnyObject? = photoData["caption"]
+        println("hiih")
+//
+//        var likesObject : NSDictionary = photoData.valueForKey("likes") as NSDictionary
+//        var likesCount : Int = captionObject.valueForKey("count") as Int
+//        
+//        var createdAt : NSDate = NSDate(timeIntervalSince1970:(captionObject.valueForKey("count") as NSString).doubleValue)
+//        
+//        self.caption = captionText
+//        self.likeCount = likesCount
+//        self.createdAt = createdAt
+//        self.user = InstagramUser(fromDictionary: (photoData.objectForKey("user") as NSDictionary))
     }
 }
