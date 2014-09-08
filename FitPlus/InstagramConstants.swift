@@ -14,4 +14,8 @@ class InstagramConstants: NSObject {
     let KCLIENT_ID_CONSTANT : String! = "5d93c4bc1c594d749acb20fe766c5059"
     let KCLIENT_SERCRET_CONSTANT : String! = "d12c3631a25e4ffaa824737088a43439"
     let KREDIRECT_URI_CONSTANT : String! = "https://0.0.0.0"
+    var cellHeaderHeight : Float = 25
+    var cellFooterHeight : Float = 25
+    var cellWidth = Float(UIScreen.mainScreen().bounds.size.width) - 20.0
+    var cellHeight = Float(UIScreen.mainScreen().bounds.size.width) - 20.0 + 50
 }

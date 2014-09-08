@@ -16,32 +16,28 @@ class NearbyCollectionViewController: UIViewController, UICollectionViewDelegate
     let kImageViewTag : Int = 11 //the imageView for the collectionViewCell is tagged with 11 in IB
     let kHeaderViewTag : Int = 33 //the header for the collectionViewCell is tagged with 33 in IB
     let kFooterViewTag : Int = 22 //the footer for the collectionViewCell is tagged with 22 in IB
-    var api : InstagramAPI = InstagramAPI.sharedInstance
-    dynamic var accessToken : String!
-    let activityIndicator : UIActivityIndicatorView! = UIActivityIndicatorView(activityIndicatorStyle: UIActivityIndicatorViewStyle.Gray)
-    var webView : UIWebView! = nil
+    var api : InstagramAPI = InstagramAPI.sharedInstance //shared instance of our api helper. it also manages the access_token from instagram
+    dynamic var accessToken : String! //dynamic KVO variable that sets access_token from UIWebView presented in this controller
+    let activityIndicator : UIActivityIndicatorView! = UIActivityIndicatorView(activityIndicatorStyle: UIActivityIndicatorViewStyle.Gray) //for loading UIWebView
+    var webView : UIWebView! = nil //WebView for Instagram login
     var manager : CLLocationManager! = CLLocationManager()
     var locationMeasurements : [CLLocation]! = [] //array of CLLocations.. some will be stale
-    var defaultLocation : CLLocation?
-    dynamic var bestEffortAtLocation : CLLocation!
-    var locationOnDisplay : InstagramLocation? = nil
-    var stateStatusView : UIView!
-    var cellHeaderHeight : Float = 25
-    var cellFooterHeight : Float = 25
+    var defaultLocation : CLLocation? // Fallback CLLocation for app for when GPS is not available
+    dynamic var bestEffortAtLocation : CLLocation! // Keeps track of most accurate GPS reading
+    var locationOnDisplay : InstagramLocation? = nil // Current Location ID (Instagram) of recent photo feed currently on screen
+    var stateStatusView : UIView! // UIView overlay that communicates state messages to user
+
+    var imageDownloadsInProgress = Dictionary<NSIndexPath, PhotoDownloader>() // Mutable data structure of images currently being downloaded. We are lazy loading!
     
     override func viewDidLoad() {
         super.viewDidLoad()
 
         // Uncomment the following line to preserve selection between presentations
         // self.clearsSelectionOnViewWillAppear = false
-        
-        let screenSize = UIScreen.mainScreen().bounds.size
-        var cellWidth = Float(screenSize.width) - 20.0
-        var cellHeight = Float(screenSize.width) - 20.0 + cellHeaderHeight + cellFooterHeight
 
         let layout: UICollectionViewFlowLayout = UICollectionViewFlowLayout()
         layout.sectionInset = UIEdgeInsets(top: 20, left: 10, bottom: 10, right: 10)
-        layout.itemSize = CGSize(width: CGFloat(cellWidth), height: CGFloat(cellHeight))
+        layout.itemSize = CGSize(width: CGFloat(InstagramConstants().cellWidth), height: CGFloat(InstagramConstants().cellHeight))
         //add the image view for photo display
         collectionView = UICollectionView(frame: self.view.frame, collectionViewLayout: layout)
         collectionView!.dataSource = self
@@ -69,6 +65,12 @@ class NearbyCollectionViewController: UIViewController, UICollectionViewDelegate
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
         // Dispose of any resources that can be recreated.
+        for (key, downloader) in imageDownloadsInProgress {
+            downloader.cancelDownload({
+                println("DEBUG: Cancelled download successfully")
+            })
+        }
+        self.imageDownloadsInProgress.removeAll(keepCapacity: false)
     }
 
     override func viewDidAppear(animated: Bool) {
@@ -119,53 +121,68 @@ class NearbyCollectionViewController: UIViewController, UICollectionViewDelegate
             } else {
                 cell.usernameLabel.text = ""
             }
-            if (photo.image != nil) {
+            if (photo.image == nil) {
                 // Dispatch operation to download the image
-                
+                if self.collectionView?.dragging == false && self.collectionView?.decelerating == false
+                {
+                    startPhotoDownload(photo, indexPath: indexPath)
+                }
                 if let imageView = cell.viewWithTag(kImageViewTag) as? UIImageView {
                     imageView.image = UIImage(named: "placeholder")
                 }
             } else {
                 if let imageView = cell.viewWithTag(kImageViewTag) as? UIImageView {
-                    imageView.image = UIImage(named: "placeholder")
+                    imageView.image = photo.image
                 }
             }
         }
         return cell
     }
     
-    // MARK: UICollectionViewDelegate
-
-    /*
-    // Uncomment this method to specify if the specified item should be highlighted during tracking
-    func collectionView(collectionView: UICollectionView!, shouldHighlightItemAtIndexPath indexPath: NSIndexPath!) -> Bool {
-        return true
+    // Starts PhotoDownload for Photo at index
+    func startPhotoDownload(photo : InstagramPhoto, indexPath : NSIndexPath) {
+        var downloader = self.imageDownloadsInProgress[indexPath]
+        
+        if (downloader == nil) {
+            downloader = PhotoDownloader()
+            downloader?.photo = photo
+            self.imageDownloadsInProgress[indexPath] = downloader
+            downloader!.completion = {
+                if let cell : InstagramPhotoCollectionViewCell = self.collectionView?.cellForItemAtIndexPath(indexPath) as? InstagramPhotoCollectionViewCell {
+                    cell.imageView.image = photo.image
+                    self.imageDownloadsInProgress.removeValueForKey(indexPath)
+                }
+            }
+            downloader?.startDownload()
+        }
     }
-    */
-
-    /*
-    // Uncomment this method to specify if the specified item should be selected
-    func collectionView(collectionView: UICollectionView!, shouldSelectItemAtIndexPath indexPath: NSIndexPath!) -> Bool {
-        return true
-    }
-    */
-
-    /*
-    // Uncomment these methods to specify if an action menu should be displayed for the specified item, and react to actions performed on the item
-    func collectionView(collectionView: UICollectionView!, shouldShowMenuForItemAtIndexPath indexPath: NSIndexPath!) -> Bool {
-        return false
-    }
-
-    func collectionView(collectionView: UICollectionView!, canPerformAction action: String!, forItemAtIndexPath indexPath: NSIndexPath!, withSender sender: AnyObject!) -> Bool {
-        return false
-    }
-
-    func collectionView(collectionView: UICollectionView!, performAction action: String!, forItemAtIndexPath indexPath: NSIndexPath!, withSender sender: AnyObject!) {
     
+    // This method is used in case the user scrolled into a set of cells that don't
+    //  have their app icons yet.
+    func loadImagesForOnscreenRows() {
+        if self.locationOnDisplay?.recentPhotos.count > 0  {
+            var visiblePaths = self.collectionView!.indexPathsForVisibleItems() as [NSIndexPath]
+            for path in visiblePaths {
+                if let photo = self.locationOnDisplay?.recentPhotos[path.row] {
+                    if (photo.image == nil) {
+                        startPhotoDownload(photo, indexPath: path)
+                    }
+                }
+            }
+        }
     }
-    */
     
-//    MARK: Utilities
+    func scrollViewDidEndDragging(scrollView: UIScrollView, willDecelerate decelerate: Bool) {
+        if !decelerate {
+            self.loadImagesForOnscreenRows()
+        }
+    }
+    
+    func scrollViewDidEndDecelerating(scrollView: UIScrollView) {
+        self.loadImagesForOnscreenRows()
+    }
+    
+    //    MARK: Utilities
     func addobservers() {
         self.addObserver(api, forKeyPath: "accessToken", options: NSKeyValueObservingOptions.New, context: nil)
         self.addObserver(api, forKeyPath: "bestEffortAtLocation", options: NSKeyValueObservingOptions.New, context: nil)
