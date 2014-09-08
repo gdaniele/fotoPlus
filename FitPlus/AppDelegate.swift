@@ -12,6 +12,7 @@ import CoreLocation
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
     var window: UIWindow?
+    var NumberOfCallsToSetVisible : Int = 0 // TODO: this should be static once swift supports it
 
     func application(application: UIApplication!, didFinishLaunchingWithOptions launchOptions: NSDictionary!) -> Bool {
         // Override point for customization after application launch.
@@ -44,7 +45,15 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     func applicationWillTerminate(application: UIApplication!) {
         // Called when the application is about to terminate. Save data if appropriate. See also applicationDidEnterBackground:.
     }
-
-
+    
+    func setNetworkActivityIndicatorVisible(setVisible : Bool) {
+        if setVisible {
+            NumberOfCallsToSetVisible++
+        } else {
+            NumberOfCallsToSetVisible--
+        }
+        assert(NumberOfCallsToSetVisible >= 0, "Network Activity Indicator was asked to hide more often than shown")
+        UIApplication.sharedApplication().networkActivityIndicatorVisible = NumberOfCallsToSetVisible > 0
+    }
 }
 

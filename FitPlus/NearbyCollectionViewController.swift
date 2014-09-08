@@ -72,7 +72,6 @@ class NearbyCollectionViewController: UIViewController, UICollectionViewDelegate
         if UIImagePickerController.isSourceTypeAvailable(UIImagePickerControllerSourceType.Camera) {
             var rightButton = UIBarButtonItem(title: "Snap", style: UIBarButtonItemStyle.Plain, target: self, action: "loadCamera")
             item.rightBarButtonItem = rightButton
-            item.hidesBackButton = true
         }
         navBar.pushNavigationItem(item, animated: true)
         var navSingleTap = UITapGestureRecognizer(target: self, action: "navSingleTap")
@@ -128,7 +127,7 @@ class NearbyCollectionViewController: UIViewController, UICollectionViewDelegate
     }
     
     func navSingleTap() {
-        if self.locationOnDisplay?.recentPhotos.count > 0 {
+        if api.nearbyInstagramLocations.count > 0 {
             indexOfLocation = (indexOfLocation + 1) % api.nearbyInstagramLocations.count
             loadInstagramLocationToView(api.nearbyInstagramLocations[indexOfLocation] as InstagramLocation)
         }

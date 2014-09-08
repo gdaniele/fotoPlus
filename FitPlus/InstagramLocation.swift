@@ -35,7 +35,7 @@ class InstagramLocation: NSObject {
     
     func downloadAndSaveRecentPhotos(success: () -> (), failure: () -> ()) {
         InstagramAPI.requestRecentPhotosFromLocation(String(self.id), success: { (json) -> () in
-            println("DEBUG: got photos for location id: \(self.id) \n da photos: \(json)")
+            println("DEBUG: got photos for location id: \(self.id) \n the photos: \(json)")
             //save the photos in the background
             var backgroundQueue = NSOperationQueue()
             backgroundQueue.addOperationWithBlock({ () -> Void in

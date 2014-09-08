@@ -21,6 +21,7 @@ class InstagramAPI: NSObject {
     var defaultLocation : CLLocation = CLLocation(latitude: 41.882584, longitude: -87.623190)
     var nearbyInstagramLocations : NSMutableArray = NSMutableArray()
     var constantsInstance : InstagramConstants = InstagramConstants()
+    var delegate = UIApplication.sharedApplication().delegate as AppDelegate
 
     override func observeValueForKeyPath(keyPath: String!, ofObject object: AnyObject!, change: [NSObject : AnyObject]!, context: UnsafeMutablePointer<Void>) {
         println("keyPath \(keyPath) changed: \(change[NSKeyValueChangeNewKey])")
@@ -88,6 +89,7 @@ class InstagramAPI: NSObject {
             urlRequest.HTTPMethod = "POST"
             urlRequest.HTTPBody = postData
             var curlString = getCurl(urlRequest)
+            delegate.setNetworkActivityIndicatorVisible(true)
             defaultSession.dataTaskWithRequest(urlRequest, completionHandler: { (data, response, error) -> Void in
                 if (error != nil) {
                     println("ERROR: \(error)")
@@ -107,6 +109,7 @@ class InstagramAPI: NSObject {
                         failure()
                     }
                 }
+                self.delegate.setNetworkActivityIndicatorVisible(false)
                 
             }).resume()
         }
@@ -133,6 +136,7 @@ class InstagramAPI: NSObject {
     func requestWithCallback(url : NSURL, success: (NSDictionary) -> (), failure: () -> ()) {
         var session : NSURLSession = NSURLSession.sharedSession()
         var error : NSError?
+        delegate.setNetworkActivityIndicatorVisible(true)
         session.dataTaskWithURL(url, completionHandler: {(data: NSData!, response: NSURLResponse!, error: NSError!) in
             if (error != nil) {
                 println("ERROR: \(error)")
@@ -152,6 +156,7 @@ class InstagramAPI: NSObject {
                     failure()
                 }
             }
+            self.delegate.setNetworkActivityIndicatorVisible(false)
         }).resume()
     }
     
