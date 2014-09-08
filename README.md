@@ -42,8 +42,6 @@ This app was built and tested with XCode 6 Beta 7. For best compatibility, this 
 ###New iOS 8 Permissions
 ![Gaining Weight](assets/1permissions.PNG =400x)
 
-###AVFoundation
-
 ## Next Steps
 ###Swift Housekeeping
 Swift is a young languge. Class and static variables are currently not supported. This app will likely need to be updated for the release of iOS 8 and XCode 6.
