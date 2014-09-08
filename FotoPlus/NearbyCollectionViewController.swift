@@ -265,7 +265,7 @@ class NearbyCollectionViewController: UIViewController, UICollectionViewDelegate
     
 // A location update failure or authorization failure notifies user that default location will be used to find recent photos
     func relocationOnDisplayLookup() {
-        UIAlertView(title: "Instagram error", message: "Can't find this location on Instagram. Defaulting to Sydney", delegate: self, cancelButtonTitle: "OK").show()
+        UIAlertView(title: "Instagram error", message: "Can't find this location on Instagram. Defaulting to somewhere beautiful :)", delegate: self, cancelButtonTitle: "OK").show()
         self.bestEffortAtLocation = defaultLocation
     }
     

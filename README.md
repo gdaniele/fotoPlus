@@ -1,6 +1,9 @@
 # Foto+
 Foto+ is an iOS 8 Swift app that shows you nearby Instagram photos and allows you to take photos and save them to your camera role. Foto+ is written entirely in Swift and uses `AVFoundation,` `CoreLocation`, and `UICollectionViews`.
 
+![Gaining Weight](assets/3lazyLoading.gif =400x)
+
+
 ## Get Started
 ###Setup
 There are no special dependencies. Get started as follows:
@@ -23,21 +26,21 @@ This app was built and tested with XCode 6 Beta 7. For best compatibility, this 
 
 ## Functional Overview
 ###Take a photo
-![Gaining Weight](assets/1snapPhotos.PNG)
+![Gaining Weight](assets/1snapPhotos.PNG =400x)
 
 ###View photos from the closest Instagram Location
-![Gaining Weight](assets/1takeSnapshot.PNG)
+![Gaining Weight](assets/1takeSnapshot.PNG =400x)
 
 ###View Other Nearby Locations by Tapping Title
-![Gaining Weight](assets/1nearby.PNG)
+![Gaining Weight](assets/3changeLocation.gif =400x)
 
 ## Technical Overview
 
 ###LazyLoading with Closures and NSOperation
-![Gaining Weight](assets/1lazyLoading.png)
+![Gaining Weight](assets/1lazyLoading.png =400x)
 
 ###New iOS 8 Permissions
-![Gaining Weight](assets/1permissions.PNG)
+![Gaining Weight](assets/1permissions.PNG =400x)
 
 ###AVFoundation
 
