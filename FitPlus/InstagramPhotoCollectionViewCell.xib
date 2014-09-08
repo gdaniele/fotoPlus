@@ -15,7 +15,7 @@
                     <imageView userInteractionEnabled="NO" tag="11" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" misplaced="YES" translatesAutoresizingMaskIntoConstraints="NO" id="2WM-pR-SBW">
                         <rect key="frame" x="0.0" y="24" width="449" height="364"/>
                     </imageView>
-                    <view contentMode="scaleToFill" misplaced="YES" translatesAutoresizingMaskIntoConstraints="NO" id="b4n-aO-ZWY">
+                    <view tag="22" contentMode="scaleToFill" misplaced="YES" translatesAutoresizingMaskIntoConstraints="NO" id="b4n-aO-ZWY" userLabel="Footer View">
                         <rect key="frame" x="0.0" y="385" width="442" height="27"/>
                         <subviews>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" misplaced="YES" text="0 likes" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="eWb-j8-Rsj">
@@ -38,7 +38,7 @@
                             <constraint firstItem="eWb-j8-Rsj" firstAttribute="centerY" secondItem="b4n-aO-ZWY" secondAttribute="centerY" id="kMT-WF-lWG"/>
                         </constraints>
                     </view>
-                    <view contentMode="scaleToFill" misplaced="YES" translatesAutoresizingMaskIntoConstraints="NO" id="RWa-dG-ATr">
+                    <view tag="33" contentMode="scaleToFill" misplaced="YES" translatesAutoresizingMaskIntoConstraints="NO" id="RWa-dG-ATr" userLabel="Header View">
                         <rect key="frame" x="0.0" y="0.0" width="442" height="27"/>
                         <subviews>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" misplaced="YES" text="5 days ago" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="T7k-rQ-M7E">
@@ -85,6 +85,10 @@
             <size key="customSize" width="444" height="411"/>
             <connections>
                 <outlet property="imageView" destination="2WM-pR-SBW" id="hZg-tt-tDh"/>
+                <outlet property="likeButton" destination="q7b-Gl-3nW" id="4it-bh-ixI"/>
+                <outlet property="likesCountLabel" destination="eWb-j8-Rsj" id="2FR-ZU-Btb"/>
+                <outlet property="timeAgoLabel" destination="T7k-rQ-M7E" id="kf7-w4-hJx"/>
+                <outlet property="usernameLabel" destination="6Sq-GJ-Of0" id="gzB-Hd-UDO"/>
             </connections>
             <point key="canvasLocation" x="269" y="79"/>
         </collectionViewCell>

@@ -142,6 +142,7 @@
 		B3303C0119A8228F006D6693 /* FitPlus */ = {
 			isa = PBXGroup;
 			children = (
+				B3B9DBD919BD6A91001D6AE8 /* Extensions */,
 				B3993E0319BD259F0036E03D /* Resources */,
 				B336963F19BE3DAF00B7B5CD /* Vendor */,
 				B3251B6219B7CCB600CB2D60 /* API */,
@@ -203,6 +204,13 @@
 				B3993E0519BD25EE0036E03D /* placeholder.png */,
 			);
 			name = Images;
+			sourceTree = "<group>";
+		};
+		B3B9DBD919BD6A91001D6AE8 /* Extensions */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Extensions;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */

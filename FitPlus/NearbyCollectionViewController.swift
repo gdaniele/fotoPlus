@@ -13,7 +13,9 @@ let reuseIdentifier = "photoCell"
 
 class NearbyCollectionViewController: UIViewController, UICollectionViewDelegateFlowLayout, UICollectionViewDataSource, CLLocationManagerDelegate, UIWebViewDelegate {
     var collectionView: UICollectionView?
-    let kImageViewTag : Int = 11 //the imageView for the collectionViewCell is tagged with 1 in IB
+    let kImageViewTag : Int = 11 //the imageView for the collectionViewCell is tagged with 11 in IB
+    let kHeaderViewTag : Int = 33 //the header for the collectionViewCell is tagged with 33 in IB
+    let kFooterViewTag : Int = 22 //the footer for the collectionViewCell is tagged with 22 in IB
     var api : InstagramAPI = InstagramAPI.sharedInstance
     dynamic var accessToken : String!
     let activityIndicator : UIActivityIndicatorView! = UIActivityIndicatorView(activityIndicatorStyle: UIActivityIndicatorViewStyle.Gray)
@@ -100,7 +102,23 @@ class NearbyCollectionViewController: UIViewController, UICollectionViewDelegate
 //        load the photo for this cell
         if let location = self.locationOnDisplay {
             var photo : InstagramPhoto = location.recentPhotos[indexPath.row]
-            
+            if let likesCount : Int = photo.likeCount {
+                cell.likesCountLabel.text = String(likesCount) + " likes"
+            } else {
+                cell.likesCountLabel.text = ""
+            }
+            if let username : String = photo.user?.username {
+                cell.usernameLabel.text = username
+            } else {
+                cell.usernameLabel.text = ""
+            }
+            if let createdAt : NSDate = photo.createdAt {
+                var formatter : NSDateFormatter = NSDateFormatter()
+                formatter.dateFormat = "MM/dd/yyyy"
+                cell.timeAgoLabel.text = formatter.stringFromDate(createdAt)
+            } else {
+                cell.usernameLabel.text = ""
+            }
             if (photo.image != nil) {
                 // Dispatch operation to download the image
                 
