@@ -59,19 +59,11 @@ class NearbyCollectionViewController: UIViewController, UICollectionViewDelegate
         navBar.frame = CGRectMake(0, 20, self.view.frame.size.width, 44)
         navBar.delegate = self
         
-        //navbar appearance
-        var navigationBarAppearace = UINavigationBar.appearance()
-        navigationBarAppearace.tintColor = UIColor.greenColor()
-        navigationBarAppearace.barTintColor = UIColor.greenColor()
-        // change navigation item title color
-        navigationBarAppearace.titleTextAttributes = [NSForegroundColorAttributeName:UIColor.whiteColor()]
-        UIApplication.sharedApplication().statusBarStyle = UIStatusBarStyle.LightContent
-        
         //navbar titles and location swapping
-        var item = UINavigationItem(title: "PicsNearMe")
+        var item = UINavigationItem(title: "Loading Nearby Photos..")
         if UIImagePickerController.isSourceTypeAvailable(UIImagePickerControllerSourceType.Camera) {
-            var rightButton = UIBarButtonItem(title: "Snap", style: UIBarButtonItemStyle.Plain, target: self, action: "loadCamera")
-            item.rightBarButtonItem = rightButton
+            var item = UINavigationItem(title: "SUPP")
+            item.rightBarButtonItem = UIBarButtonItem(barButtonSystemItem: UIBarButtonSystemItem.Camera, target: self, action: "loadCamera")
         }
         navBar.pushNavigationItem(item, animated: true)
         var navSingleTap = UITapGestureRecognizer(target: self, action: "navSingleTap")
