@@ -6,7 +6,7 @@ Foto+ is an iOS 8 Swift app that shows you nearby Instagram photos and allows yo
 
 ## Get Started
 ###Setup
-There are no special dependencies. Get started as follows:
+There are no special dependencies for this project. Get started by cloning the repository and building the app in XCode 6.
 
 	git clone git@github.com:gdaniele/fotoPlus.git
 	cd fotoPlus
@@ -37,6 +37,11 @@ This app was built and tested with XCode 6 Beta 7. For best compatibility, this 
 ## Technical Overview
 
 ###LazyLoading with Closures and NSOperation
+FotoPlus uses a three part lazy load to keep the UI responsive while metadata and images are downloaded, parsed, and presented.
+1. No data has been loaded (UINavigationBar shows status)
+2. Text-only data has been loaded (placeholder image loaded)
+3. Images are loaded asynchronously
+
 ![Gaining Weight](/assets/1lazyLoading.png?raw=true =400x)
 
 ###New iOS 8 Permissions
