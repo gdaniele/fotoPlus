@@ -1,5 +1,7 @@
 # Foto+
-Foto+ is an iOS 8 Swift app that shows you nearby Instagram photos and allows you to take photos and save them to your camera role. Foto+ is written entirely in Swift and uses `AVFoundation,` `CoreLocation`, and `UICollectionViews`.
+Foto+ is an iOS 8 photo discovery app written entirely in Swift. For now, Foto+ uses the Instagram API to display nearby photos (using device's location).
+
+This app can be a reference for using `AVFoundation,` `CoreLocation`, and `UICollectionViews` in Swift.
 
 ![Gaining Weight](/assets/3lazyLoading.gif?raw=true =400x)
 
@@ -42,14 +44,20 @@ FotoPlus uses a three part lazy load to keep the UI responsive while metadata an
 2. Text-only data has been loaded (placeholder image loaded)
 3. Images are loaded asynchronously
 
+If the UICollectionView is scrolling, downloads do not begin until scrolling is finished.
+
 ![Gaining Weight](/assets/1lazyLoading.png?raw=true =400x)
 
 ###New iOS 8 Permissions
 ![Gaining Weight](/assets/1permissions.PNG?raw=true =400x)
 
+iOS 8 requires setting an app-level description of GPS usage of the device for authorization. New in iOS 8 is that iOS will only ask the user for authorization is a reason is stated by setting the`NSLocationWhenInUseUsageDescription`key in the Info.plist.
+
+In cases where permission is not granted or a location update fails, FotoPlus defaults to a saved location to simulate showing nearby photos.
+
 ## Next Steps
 ###Swift Housekeeping
-Swift is a young languge. Class and static variables are currently not supported. This app will likely need to be updated for the release of iOS 8 and XCode 6.
+Swift is a young language. Class and static variables are currently not supported. This app will likely need to be updated for the release of iOS 8 and XCode 6.
 
 ###Unliking Photos
 The `InstagramAPI` class should support unlike requests, but the Instagram API currently does not support unliking photos. Unliking could be supporting in the future using an `NSURLSession` to make a request with an  delete HTTP header method.
